@@ -9,15 +9,18 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.example.tuanle.chatapplication.R;
+import com.example.tuanle.chatapplication.Response.Message;
+import com.example.tuanle.chatapplication.Utils.Constants.ExtraKey;
+import com.example.tuanle.chatapplication.Utils.PreferenceUtils;
 
 import java.util.ArrayList;
 
 public class DetailConservationAdapter extends RecyclerView.Adapter<DetailConservationAdapter.ItemHolder>{
-    private ArrayList<String> conservation;
-    private int number;
-    public DetailConservationAdapter(ArrayList<String> listMsg) {
+    private ArrayList<Message> conservation;
+    private String userName;
+    public DetailConservationAdapter(ArrayList<Message> listMsg) {
         this.conservation = listMsg;
-        number = 0;
+        userName = PreferenceUtils.getStringPref(ExtraKey.USER_NAME,null);
     }
 
     @NonNull
@@ -29,8 +32,9 @@ public class DetailConservationAdapter extends RecyclerView.Adapter<DetailConser
 
     @Override
     public void onBindViewHolder(@NonNull ItemHolder holder, int position) {
-        holder.message.setText(conservation.get(position));
-        if(number%2 == 0)
+        Message curMessage = conservation.get(position);
+        holder.message.setText(curMessage.getRep_message());
+        if(curMessage.getUser_name().equals(userName))
         {
             RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
 
@@ -49,12 +53,15 @@ public class DetailConservationAdapter extends RecyclerView.Adapter<DetailConser
                 holder.message.setLayoutParams(params);
             }
         }
-        number ++;
     }
 
     @Override
     public int getItemCount() {
         return conservation.size();
+    }
+
+    public void setConservation(ArrayList<Message> conservation) {
+        this.conservation = conservation;
     }
 
     public class ItemHolder extends RecyclerView.ViewHolder{

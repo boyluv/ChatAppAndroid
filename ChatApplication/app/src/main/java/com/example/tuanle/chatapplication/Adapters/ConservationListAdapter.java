@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,15 +12,19 @@ import android.widget.TextView;
 
 import com.example.tuanle.chatapplication.Activities.DetailConservationActivity;
 import com.example.tuanle.chatapplication.R;
+import com.example.tuanle.chatapplication.Response.ConvoResponse;
+import com.example.tuanle.chatapplication.Utils.Constants.ExtraKey;
 
 import java.util.ArrayList;
 
 public class ConservationListAdapter extends RecyclerView.Adapter<ConservationListAdapter.ItemViewHolder>{
-    private ArrayList<String> conservationList;
+    private ArrayList<ConvoResponse> listConvo;
     private Context mContext;
-    public ConservationListAdapter(Context context, ArrayList<String> list) {
-        conservationList = list;
+    public ConservationListAdapter(Context context,ArrayList<ConvoResponse> mine) {
         mContext = context;
+        listConvo = mine;
+        //Log.d("listConvo", "Adapter" + listConvo.get(0).getRep_message());
+
     }
 
     @NonNull
@@ -31,13 +36,16 @@ public class ConservationListAdapter extends RecyclerView.Adapter<ConservationLi
 
     @Override
     public void onBindViewHolder(@NonNull ItemViewHolder holder, int position) {
-        String username = "User " + position;
-        holder.userName.setText(username);
-        holder.lastChat.setText(conservationList.get(position));
+        final ConvoResponse curResponse = listConvo.get(position);
+        holder.userName.setText(curResponse.getUser_name());
+        holder.lastChat.setText(curResponse.getRep_message());
         holder.userName.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                //Start Activity to Detail Conservation
                 Intent intent = new Intent(mContext, DetailConservationActivity.class);
+                Log.d("DetailConvo", "This is convo Id " + curResponse.getRelated_to_convo());
+                intent.putExtra(ExtraKey.CONSERVATION_ID, curResponse.getRelated_to_convo());
                 mContext.startActivity(intent);
             }
         });
@@ -45,7 +53,11 @@ public class ConservationListAdapter extends RecyclerView.Adapter<ConservationLi
 
     @Override
     public int getItemCount() {
-        return conservationList.size();
+        return listConvo.size();
+    }
+
+    public void setListConvo(ArrayList<ConvoResponse> listConvo) {
+        this.listConvo = listConvo;
     }
 
     public class ItemViewHolder extends RecyclerView.ViewHolder{

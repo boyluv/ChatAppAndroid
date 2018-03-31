@@ -5,14 +5,10 @@ import com.google.gson.annotations.SerializedName;
 
 import java.util.List;
 
-/**
- * Created by tuanle on 3/4/18.
- */
-public class LogInResponse {
-
+public class ListConvoResponse {
     @SerializedName("data")
     @Expose
-    private List<UserInfo> results ;
+    private List<ConvoResponse> results ;
 
     @SerializedName("status")
     @Expose
@@ -22,7 +18,7 @@ public class LogInResponse {
     @Expose
     private boolean isSignin;
 
-    public List<UserInfo> getResults() {
+    public List<ConvoResponse> getResults() {
         return results;
     }
 
@@ -34,7 +30,7 @@ public class LogInResponse {
         return isSignin;
     }
 
-    public void setResults(List<UserInfo> results) {
+    public void setResults(List<ConvoResponse> results) {
         this.results = results;
     }
 

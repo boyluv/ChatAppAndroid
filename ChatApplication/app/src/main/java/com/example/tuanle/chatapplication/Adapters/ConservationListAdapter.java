@@ -44,8 +44,8 @@ public class ConservationListAdapter extends RecyclerView.Adapter<ConservationLi
             public void onClick(View v) {
                 //Start Activity to Detail Conservation
                 Intent intent = new Intent(mContext, DetailConservationActivity.class);
-                Log.d("DetailConvo", "This is convo Id " + curResponse.getRelated_to_convo());
-                intent.putExtra(ExtraKey.CONSERVATION_ID, curResponse.getRelated_to_convo());
+                Log.d("DetailConvo", "This is convo Id " + curResponse.getRef_convo_id());
+                intent.putExtra(ExtraKey.CONSERVATION_ID, curResponse.getRef_convo_id());
                 mContext.startActivity(intent);
             }
         });

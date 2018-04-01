@@ -31,9 +31,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         String userId = PreferenceUtils.getStringPref(getBaseContext(),ExtraKey.USER_ID,null);
-        if(userId !=null){
-            showListConservation();
-        }
+
+        //If already Log in change to inside
+//        if(userId !=null){
+//            showListConservation();
+//        }
         userName = (EditText) findViewById(R.id.edt_name);
         password = (EditText) findViewById(R.id.edt_password);
         btn_signIn =  findViewById(R.id.signin_btn);
@@ -72,7 +74,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                     try{
                                         Log.d("UserLogin", response.body().getResults().get(0).getUser_id());
                                         PreferenceUtils.saveStringPref(getBaseContext(),ExtraKey.USER_ID,response.body().getResults().get(0).getUser_id());
-                                        PreferenceUtils.saveStringPref(getBaseContext(),ExtraKey.USER_NAME,response.body().getResults().get(0).getUser_id());
+                                        PreferenceUtils.saveStringPref(getBaseContext(),ExtraKey.USER_NAME,userName.getText().toString());
+
                                         //Start new Activity , change to list conservation
                                         showListConservation();
                                     }

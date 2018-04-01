@@ -1,12 +1,17 @@
 package com.example.tuanle.chatapplication.Adapters;
 
+import android.content.Context;
+import android.graphics.Color;
 import android.support.annotation.NonNull;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.tuanle.chatapplication.R;
 import com.example.tuanle.chatapplication.Response.Message;
@@ -18,9 +23,11 @@ import java.util.ArrayList;
 public class DetailConservationAdapter extends RecyclerView.Adapter<DetailConservationAdapter.ItemHolder>{
     private ArrayList<Message> conservation;
     private String userName;
-    public DetailConservationAdapter(ArrayList<Message> listMsg) {
+    private Context context;
+    public DetailConservationAdapter(Context context,ArrayList<Message> listMsg) {
+        this.context = context;
         this.conservation = listMsg;
-        userName = PreferenceUtils.getStringPref(ExtraKey.USER_NAME,null);
+        userName = PreferenceUtils.getStringPref(context,ExtraKey.USER_NAME,null);
     }
 
     @NonNull
@@ -32,8 +39,16 @@ public class DetailConservationAdapter extends RecyclerView.Adapter<DetailConser
 
     @Override
     public void onBindViewHolder(@NonNull ItemHolder holder, int position) {
-        Message curMessage = conservation.get(position);
+        final Message curMessage = conservation.get(position);
         holder.message.setText(curMessage.getRep_message());
+
+        holder.message.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.d("UserName","CurUserName " + userName +" CurMessage  " + curMessage.getUser_name());
+            }
+        });
+
         if(curMessage.getUser_name().equals(userName))
         {
             RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
@@ -42,16 +57,17 @@ public class DetailConservationAdapter extends RecyclerView.Adapter<DetailConser
             params.addRule(RelativeLayout.ALIGN_PARENT_END);
 
             holder.message.setLayoutParams(params);
+            holder.message.setBackgroundColor(ContextCompat.getColor(context, R.color.colorPrimary));
         }
         else {
-            {
+
                 RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
 
 // Add all the rules you need
                 params.addRule(RelativeLayout.ALIGN_PARENT_START);
 
                 holder.message.setLayoutParams(params);
-            }
+            holder.message.setBackgroundColor(Color.parseColor("#dddddd"));
         }
     }
 

@@ -4,17 +4,14 @@ import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
 public class MessageRequest {
-    @SerializedName("rep_id")
-    @Expose
-    private int rep_id;
 
     @SerializedName("rep_message")
     @Expose
     private String rep_message;
 
-    @SerializedName("related_to_convo")
+    @SerializedName("ref_convo_id")
     @Expose
-    private int related_to_convo;
+    private int ref_convo_id;
 
     @SerializedName("rep_by")
     @Expose

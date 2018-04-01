@@ -18,6 +18,7 @@ import com.example.tuanle.chatapplication.Response.Message;
 import com.example.tuanle.chatapplication.Retrofit.ApiUtils;
 import com.example.tuanle.chatapplication.Retrofit.SOService;
 import com.example.tuanle.chatapplication.Utils.Constants.ExtraKey;
+import com.example.tuanle.chatapplication.Utils.PreferenceUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -32,6 +33,8 @@ public class DetailConservationActivity extends AppCompatActivity implements Vie
     private SOService mService;
     private ImageButton imgBtnSend;
     private EditText mMessage;
+    private int curConvoId;
+    private int userId;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -41,8 +44,10 @@ public class DetailConservationActivity extends AppCompatActivity implements Vie
         mMessage = (EditText) findViewById(R.id.edt_message);
         imgBtnSend.setOnClickListener(this);
 
-        String convo_id = getIntent().getStringExtra(ExtraKey.CONSERVATION_ID);
-        Log.d("DetailConvo", "This is convo Id " + convo_id);
+        curConvoId = Integer.parseInt(getIntent().getStringExtra(ExtraKey.CONSERVATION_ID));
+        userId = Integer.parseInt(PreferenceUtils.getStringPref(getBaseContext(),ExtraKey.USER_ID,"-1"));
+
+        Log.d("DetailConvo", "This is convo Id " + curConvoId);
 
         mRecyclerView.setHasFixedSize(true);
 
@@ -50,7 +55,7 @@ public class DetailConservationActivity extends AppCompatActivity implements Vie
         layoutManager.setStackFromEnd(true); //always show list from bottom
         mRecyclerView.setLayoutManager(layoutManager);
 
-        mAdapter = new DetailConservationAdapter(new ArrayList<Message>());
+        mAdapter = new DetailConservationAdapter(getBaseContext(),new ArrayList<Message>());
         mRecyclerView.setAdapter(mAdapter);
 
         loadMessage();
@@ -61,7 +66,7 @@ public class DetailConservationActivity extends AppCompatActivity implements Vie
 
     private void loadMessage(){
         mService = ApiUtils.getSOService();
-        mService.getDetailConvo(1).enqueue(new Callback<DetailConvoResponse>() {
+        mService.getDetailConvo(curConvoId).enqueue(new Callback<DetailConvoResponse>() {
             @Override
             public void onResponse(Call<DetailConvoResponse> call, Response<DetailConvoResponse> response) {
                 if(response.isSuccessful()) {
@@ -82,10 +87,12 @@ public class DetailConservationActivity extends AppCompatActivity implements Vie
     public void onClick(View v) {
         switch (v.getId()){
             case R.id.imgbtn_send:
+//                mAdapter.setConservation(new ArrayList<Message>());
+//                mAdapter.notifyDataSetChanged();
                 final String mes = mMessage.getText().toString();
                 mService =ApiUtils.getSOService();
                 //TODO------Update and remove id Message
-                mService.addMessage(69,mes ,1,1).enqueue(new Callback<MessageRequest>() {
+                mService.addMessage(mes ,curConvoId,userId).enqueue(new Callback<MessageRequest>() {
                     @Override
                     public void onResponse(Call<MessageRequest> call, Response<MessageRequest> response) {
                         if(response.isSuccessful()){

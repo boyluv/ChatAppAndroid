@@ -40,13 +40,15 @@ public class SignUpActivity extends AppCompatActivity implements View.OnClickLis
                 //TODO-----Binh
                 String name = edtUserName.getText().toString();
                 String pass = edtPass.getText().toString();
-                //TODO--Fix id number by remove it
-                mService.signUp(25,name,pass,true).enqueue(new Callback<SignupRequest>() {
+                mService.signUp(name,pass,true).enqueue(new Callback<SignupRequest>() {
                     @Override
                     public void onResponse(Call<SignupRequest> call, Response<SignupRequest> response) {
-                        if(response.isSuccessful())
+                        if(response.isSuccessful()){
                             Toast.makeText(getBaseContext(), "Sign up success ",
-                                Toast.LENGTH_SHORT).show();
+                                    Toast.LENGTH_SHORT).show();
+                            finish();
+                        }
+
                         else
                             Toast.makeText(getBaseContext(), "Sign up failed",
                                     Toast.LENGTH_SHORT).show();

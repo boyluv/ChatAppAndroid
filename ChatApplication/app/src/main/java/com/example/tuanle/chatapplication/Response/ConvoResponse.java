@@ -12,9 +12,9 @@ public class ConvoResponse {
     @Expose
     private String rep_message;
 
-    @SerializedName("related_to_convo")
+    @SerializedName("ref_convo_id")
     @Expose
-    private String related_to_convo;
+    private String ref_convo_id;
 
     public String getUser_name() {
         return user_name;
@@ -32,11 +32,11 @@ public class ConvoResponse {
         this.rep_message = rep_message;
     }
 
-    public String getRelated_to_convo() {
-        return related_to_convo;
+    public String getRef_convo_id() {
+        return ref_convo_id;
     }
 
-    public void setRelated_to_convo(String related_to_convo) {
-        this.related_to_convo = related_to_convo;
+    public void setRef_convo_id(String related_to_convo) {
+        this.ref_convo_id = related_to_convo;
     }
 }

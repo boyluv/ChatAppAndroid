@@ -34,12 +34,12 @@ public interface SOService {
     //Sign up User
     //TODO--Fix id number by remove it
     @POST("/user/add")
-    Call<SignupRequest> signUp(@Query("id") int id,@Query("name") String name,
+    Call<SignupRequest> signUp(@Query("name") String name,
                                @Query("pass") String pass,@Query("isUser") boolean isUser);
 
     //Add new message
     //TODO--Fix id number by remove it
     @POST("/user/replies")
-    Call<MessageRequest> addMessage(@Query("rep_id") int rep_id, @Query("rep_message") String rep_message,
-                                @Query("related_to_convo") int related_to_convo, @Query("rep_by") int rep_by);
+    Call<MessageRequest> addMessage(@Query("rep_message") String rep_message,
+                                @Query("ref_convo_id") int ref_convo_id, @Query("rep_by") int rep_by);
 }

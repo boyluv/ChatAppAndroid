@@ -4,6 +4,7 @@ import com.example.tuanle.chatapplication.Request.MessageRequest;
 import com.example.tuanle.chatapplication.Request.SignupRequest;
 import com.example.tuanle.chatapplication.Response.ConvoResponse;
 import com.example.tuanle.chatapplication.Response.DetailConvoResponse;
+import com.example.tuanle.chatapplication.Response.KeyResponse;
 import com.example.tuanle.chatapplication.Response.ListConvoResponse;
 import com.example.tuanle.chatapplication.Response.LogInResponse;
 
@@ -42,4 +43,8 @@ public interface SOService {
     @POST("/user/replies")
     Call<MessageRequest> addMessage(@Query("rep_message") String rep_message,
                                 @Query("ref_convo_id") int ref_convo_id, @Query("rep_by") int rep_by);
+
+    //Log in and return user id
+    @GET("/key")
+    Call<KeyResponse> getKey();
 }

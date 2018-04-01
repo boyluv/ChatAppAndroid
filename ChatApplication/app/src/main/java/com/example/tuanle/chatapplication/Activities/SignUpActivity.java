@@ -8,6 +8,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.example.tuanle.chatapplication.Algorithm.CrDES;
 import com.example.tuanle.chatapplication.R;
 import com.example.tuanle.chatapplication.Request.SignupRequest;
 import com.example.tuanle.chatapplication.Response.KeyResponse;
@@ -31,6 +32,7 @@ public class SignUpActivity extends AppCompatActivity implements View.OnClickLis
         btnSignUp = (Button) findViewById(R.id.signup_btn);
         edtUserName = (EditText) findViewById(R.id.edt_name);
         edtPass = (EditText) findViewById(R.id.edt_password);
+        mKey = null;
         getKey();
         btnSignUp.setOnClickListener(this);
     }
@@ -42,8 +44,8 @@ public class SignUpActivity extends AppCompatActivity implements View.OnClickLis
                 if(response.isSuccessful()){
                     //TODO--Binh this is Key
                     mKey = response.body().getData();
-                    Toast.makeText(getBaseContext(), mKey,
-                            Toast.LENGTH_SHORT).show();
+//                    Toast.makeText(getBaseContext(), mKey,
+//                            Toast.LENGTH_SHORT).show();
                 }
             }
 
@@ -57,11 +59,15 @@ public class SignUpActivity extends AppCompatActivity implements View.OnClickLis
     public void onClick(View v) {
         switch (v.getId()){
             case R.id.signup_btn:
+                if(mKey == null)
+                    getKey();
                 mService = ApiUtils.getSOService();
                 //TODO-----Binh
                 String name = edtUserName.getText().toString();
                 String pass = edtPass.getText().toString();
-                mService.signUp(name,pass,true).enqueue(new Callback<SignupRequest>() {
+
+                String encryptedPass = CrDES.encryptDES(mKey,pass);
+                mService.signUp(name,encryptedPass,true).enqueue(new Callback<SignupRequest>() {
                     @Override
                     public void onResponse(Call<SignupRequest> call, Response<SignupRequest> response) {
                         if(response.isSuccessful()){

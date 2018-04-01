@@ -11,6 +11,7 @@ import android.widget.ImageButton;
 import android.widget.Toast;
 
 import com.example.tuanle.chatapplication.Adapters.DetailConservationAdapter;
+import com.example.tuanle.chatapplication.Algorithm.CrRSA;
 import com.example.tuanle.chatapplication.R;
 import com.example.tuanle.chatapplication.Request.MessageRequest;
 import com.example.tuanle.chatapplication.Response.DetailConvoResponse;
@@ -60,8 +61,23 @@ public class DetailConservationActivity extends AppCompatActivity implements Vie
 
         loadMessage();
 
+        try{
+            CrRSA.generateKey();
+            String a = CrRSA.getPublicKey(CrRSA.publicKey);
+            String b = CrRSA.getPrivateKey(CrRSA.privateKey);
+            Log.d("KeyCryp","Pub a: "+a);
+            Log.d("KeyCryp","Pri b: "+b);
+            String msg = "hello";
 
+            String e = CrRSA.encryptRSA(msg, CrRSA.publicKey);
+            Log.d("KeyCrype","Pri e: "+e);
+            String d = CrRSA.decryptRSA(msg, CrRSA.privateKey);
+            Log.d("KeyCrypd","Pub d: "+d);
 
+        }
+        catch (Exception e){
+            Log.d("Encryt",e.toString());
+        }
     }
 
     private void loadMessage(){

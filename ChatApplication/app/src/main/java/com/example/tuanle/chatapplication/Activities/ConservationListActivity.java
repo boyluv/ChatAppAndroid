@@ -25,6 +25,7 @@ import retrofit2.Response;
 
 public class ConservationListActivity extends AppCompatActivity {
     private RecyclerView mRecyclerView;
+    private RecyclerView mRvCategories;
     private ConservationListAdapter mAdapter;
     private SOService mService;
 
@@ -37,13 +38,21 @@ public class ConservationListActivity extends AppCompatActivity {
         Log.d("UserLogin", "New activity " + userId);
 
         mRecyclerView = (RecyclerView) findViewById(R.id.rv_conservation_lists);
+//        TODO
+//        mRvCategories = (RecyclerView) findViewById(R.id.rv_vertical_conservation_lists);
 
+//        //Initialize list categories
+//        mRvCategories.setHasFixedSize(true);
+//        mRvCategories.setLayoutManager(new LinearLayoutManager(this,LinearLayoutManager.VERTICAL,false));
+//        mAdapter = new ConservationListAdapter(getBaseContext(),new ArrayList<ConvoResponse>());
+//        mRvCategories.setAdapter(mAdapter);
+
+
+        //Initialize history chat
         mRecyclerView.setHasFixedSize(true);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         mAdapter = new ConservationListAdapter(getBaseContext(),new ArrayList<ConvoResponse>());
         mRecyclerView.setAdapter(mAdapter);
-
-
         loadListConvo();
 
 

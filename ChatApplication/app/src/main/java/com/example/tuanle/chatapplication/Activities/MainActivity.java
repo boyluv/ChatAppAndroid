@@ -9,7 +9,9 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.example.tuanle.chatapplication.Algorithm.CrDES;
 import com.example.tuanle.chatapplication.R;
+import com.example.tuanle.chatapplication.Response.KeyResponse;
 import com.example.tuanle.chatapplication.Response.LogInResponse;
 import com.example.tuanle.chatapplication.Retrofit.ApiUtils;
 import com.example.tuanle.chatapplication.Retrofit.SOService;
@@ -26,16 +28,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private SOService mService;
     private EditText userName;
     private EditText password;
+    private String mKey;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         String userId = PreferenceUtils.getStringPref(getBaseContext(),ExtraKey.USER_ID,null);
-
+        mKey = null;
+        getKey();
         //If already Log in change to inside
-//        if(userId !=null){
-//            showListConservation();
-//        }
+        if(userId !=null){
+            showListConservation();
+        }
         userName = (EditText) findViewById(R.id.edt_name);
         password = (EditText) findViewById(R.id.edt_password);
         btn_signIn =  findViewById(R.id.signin_btn);
@@ -59,49 +63,73 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         Intent intent = new Intent(getBaseContext(), ConservationListActivity.class);
         startActivity(intent);
     }
+
+    private void getKey(){
+        mService = ApiUtils.getSOService();
+        mService.getKey().enqueue(new Callback<KeyResponse>() {
+            @Override
+            public void onResponse(Call<KeyResponse> call, Response<KeyResponse> response) {
+                if(response.isSuccessful()){
+                    //TODO--Binh this is Key
+                    mKey = response.body().getData();
+//                    Toast.makeText(getBaseContext(), mKey,
+//                            Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<KeyResponse> call, Throwable t) {
+
+            }
+        });
+    }
+
     @Override
     public void onClick(View v) {
         switch (v.getId()){
             case R.id.signin_btn:
-                if(validateUser())
-                {
-                    mService = ApiUtils.getSOService();
-                    mService.logIn(userName.getText().toString(),password.getText().toString()).enqueue(new Callback<LogInResponse>() {
-                        @Override
-                        public void onResponse(Call<LogInResponse> call, Response<LogInResponse> response) {
-                            if(response.isSuccessful()) {
-                                if(response.body().isSignin()){
-                                    try{
-                                        Log.d("UserLogin", response.body().getResults().get(0).getUser_id());
-                                        PreferenceUtils.saveStringPref(getBaseContext(),ExtraKey.USER_ID,response.body().getResults().get(0).getUser_id());
-                                        PreferenceUtils.saveStringPref(getBaseContext(),ExtraKey.USER_NAME,userName.getText().toString());
+                if (mKey == null)
+                    getKey();
+                else if(validateUser())
+                    {
+                        String encryptedPass = CrDES.encryptDES(mKey,password.getText().toString());
+                        mService = ApiUtils.getSOService();
+                        mService.logIn(userName.getText().toString(),encryptedPass).enqueue(new Callback<LogInResponse>() {
+                            @Override
+                            public void onResponse(Call<LogInResponse> call, Response<LogInResponse> response) {
+                                if(response.isSuccessful()) {
+                                    if(response.body().isSignin()){
+                                        try{
+                                            Log.d("UserLogin", response.body().getResults().get(0).getUser_id());
+                                            PreferenceUtils.saveStringPref(getBaseContext(),ExtraKey.USER_ID,response.body().getResults().get(0).getUser_id());
+                                            PreferenceUtils.saveStringPref(getBaseContext(),ExtraKey.USER_NAME,userName.getText().toString());
 
-                                        //Start new Activity , change to list conservation
-                                        showListConservation();
+                                            //Start new Activity , change to list conservation
+                                            showListConservation();
+                                        }
+                                        catch (NullPointerException e){
+                                            Toast.makeText(getBaseContext(), "Log in failed",
+                                                    Toast.LENGTH_SHORT).show();
+                                            Log.d("UserLogin", "Null add ress");
+
+                                        }
                                     }
-                                    catch (NullPointerException e){
-                                        Toast.makeText(getBaseContext(), "Log in failed",
+                                    else{
+                                        Log.e("UserLogin","Wrong user or password");
+                                        Toast.makeText(getBaseContext(), "Wrong username or password",
                                                 Toast.LENGTH_SHORT).show();
-                                        Log.d("UserLogin", "Null add ress");
-
                                     }
                                 }
-                                else{
-                                    Log.e("UserLogin","Wrong user or password");
-                                    Toast.makeText(getBaseContext(), "Wrong username or password",
-                                            Toast.LENGTH_SHORT).show();
-                                }
+                                else
+                                    Log.d("UserLogin",response.toString());
                             }
-                            else
-                                Log.d("UserLogin",response.toString());
-                        }
 
-                        @Override
-                        public void onFailure(Call<LogInResponse> call, Throwable t) {
-                            Log.d("UserLogin","Log in failed");
-                        }
-                    });
-                }
+                            @Override
+                            public void onFailure(Call<LogInResponse> call, Throwable t) {
+                                Log.d("UserLogin","Log in failed");
+                            }
+                        });
+                    }
                 break;
             case R.id.signup_btn:
                 signUp();

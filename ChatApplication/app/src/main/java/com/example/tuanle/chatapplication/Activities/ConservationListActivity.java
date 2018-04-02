@@ -69,17 +69,73 @@ public class ConservationListActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 sendRequestToChat();
+                //testMethod();
             }
         });
         new ListenRequest().execute("","","");
 
 
     }
+
+    private void testMethod(){
+        SOService createService = ApiUtils.getSOService();
+        createService.createConvo(9,8).enqueue(new Callback<CreateConvoResponse>() {
+            @Override
+            public void onResponse(Call<CreateConvoResponse> call, Response<CreateConvoResponse> response) {
+                if(response.isSuccessful()){
+                    Log.d("RequestSend","create convo failed");
+
+//                    final int convo_id = response.body().getConvo_id();
+//                    //Delete Request
+//                    SOService curService = ApiUtils.getSOService();
+//                    curService.deleteRequest(curUserId).enqueue(new Callback<RemoveRequestResponse>() {
+//                        @Override
+//                        public void onResponse(Call<RemoveRequestResponse> call, Response<RemoveRequestResponse> response) {
+//                            //Add new Request
+//                            int idUser = Integer.parseInt(PreferenceUtils.getStringPref(getBaseContext(),ExtraKey.USER_ID,"1"));
+//                            mService = ApiUtils.getSOService();
+//                            mService.sendRequest(idUser,receiverInSecondRequest,"Second_CurKey_1").enqueue(new Callback<RequestDetail>() {
+//                                @Override
+//                                public void onResponse(Call<RequestDetail> call, Response<RequestDetail> response) {
+//                                    Log.d("Request","Send success");
+//
+//                                    Intent intent = new Intent(getBaseContext(), DetailConservationActivity.class);
+//                                    Log.d("DetailConvo", "This is convo Id " + convo_id+"");
+//                                    intent.putExtra(ExtraKey.CONSERVATION_ID, convo_id);
+//                                    startActivity(intent);
+//
+//                                    Toast.makeText(getBaseContext(),"Now you (Receiver) can change activity to "+convo_id,Toast.LENGTH_LONG).show();
+//                                }
+//
+//                                @Override
+//                                public void onFailure(Call<RequestDetail> call, Throwable t) {
+//                                    Log.d("RequestSend","failed");
+//
+//                                }
+//                            });
+//                        }
+//
+//                        @Override
+//                        public void onFailure(Call<RemoveRequestResponse> call, Throwable t) {
+//                            Log.d("RequestSend","delete failed");
+//
+//                        }
+//                    });
+                }
+            }
+
+            @Override
+            public void onFailure(Call<CreateConvoResponse> call, Throwable t) {
+                Log.d("RequestSend","create convo failed");
+
+            }
+        });
+    }
     private void sendRequestToChat(){
         mService = ApiUtils.getSOService();
         int idUser = Integer.parseInt(PreferenceUtils.getStringPref(getBaseContext(),ExtraKey.USER_ID,"1"));
         //TODO--Get Receiver Id
-        mService.sendRequest(idUser,2,"First_CurKey").enqueue(new Callback<RequestDetail>() {
+        mService.sendRequest(idUser,9,"First_CurKey").enqueue(new Callback<RequestDetail>() {
             @Override
             public void onResponse(Call<RequestDetail> call, Response<RequestDetail> response) {
                 Log.d("Request","Send success");
@@ -114,6 +170,8 @@ public class ConservationListActivity extends AppCompatActivity {
                         curResponse  = response.body();
                         Log.d("Request","Change activity to "+curResponse.getData().get(0).getReq_sender());
 
+                        //TODO---Check this variable
+                        final int receiverInSecondRequest =  Integer.parseInt(curResponse.getData().get(0).getReq_sender());
                         //Delete and change activity
                         String mess = curResponse.getData().get(0).getMessagedata();
                         final String[] separated = mess.split("_");
@@ -138,8 +196,9 @@ public class ConservationListActivity extends AppCompatActivity {
                                             @Override
                                             public void onResponse(Call<RemoveRequestResponse> call, Response<RemoveRequestResponse> response) {
                                                 //Add new Request
+                                                int idUser = Integer.parseInt(PreferenceUtils.getStringPref(getBaseContext(),ExtraKey.USER_ID,"1"));
                                                 mService = ApiUtils.getSOService();
-                                                mService.sendRequest(1,2,"Second_CurKey_1").enqueue(new Callback<RequestDetail>() {
+                                                mService.sendRequest(idUser,receiverInSecondRequest,"Second_CurKey_1").enqueue(new Callback<RequestDetail>() {
                                                     @Override
                                                     public void onResponse(Call<RequestDetail> call, Response<RequestDetail> response) {
                                                         Log.d("Request","Send success");
@@ -154,6 +213,7 @@ public class ConservationListActivity extends AppCompatActivity {
 
                                                     @Override
                                                     public void onFailure(Call<RequestDetail> call, Throwable t) {
+                                                        Log.d("RequestSend","failed");
 
                                                     }
                                                 });
@@ -161,6 +221,7 @@ public class ConservationListActivity extends AppCompatActivity {
 
                                             @Override
                                             public void onFailure(Call<RemoveRequestResponse> call, Throwable t) {
+                                                Log.d("RequestSend","delete failed");
 
                                             }
                                         });
@@ -169,6 +230,7 @@ public class ConservationListActivity extends AppCompatActivity {
 
                                 @Override
                                 public void onFailure(Call<CreateConvoResponse> call, Throwable t) {
+                                    Log.d("RequestSend","create convo failed");
 
                                 }
                             });

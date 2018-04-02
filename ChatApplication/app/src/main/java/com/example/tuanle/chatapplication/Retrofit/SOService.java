@@ -3,6 +3,7 @@ package com.example.tuanle.chatapplication.Retrofit;
 import com.example.tuanle.chatapplication.Request.MessageRequest;
 import com.example.tuanle.chatapplication.Request.SignupRequest;
 import com.example.tuanle.chatapplication.Response.ConvoResponse;
+import com.example.tuanle.chatapplication.Response.CreateCategoryResponse;
 import com.example.tuanle.chatapplication.Response.CreateConvoResponse;
 import com.example.tuanle.chatapplication.Response.DetailConvoResponse;
 import com.example.tuanle.chatapplication.Response.KeyResponse;
@@ -66,7 +67,11 @@ public interface SOService {
     @DELETE("/request/remove/{id}")
     Call<RemoveRequestResponse> deleteRequest(@Path("id") int id);
 
-    @POST("/convoadd")
+    @GET("/convoadd")
     Call<CreateConvoResponse> createConvo(@Query("convo_cat") int convo_cat,
                                      @Query("convo_by") int convo_by);
+
+    @POST("/cate/add")
+    Call<CreateCategoryResponse> createCategory(@Query("cat_name") String cat_name,
+                                             @Query("cat_description") String cat_description);
 }

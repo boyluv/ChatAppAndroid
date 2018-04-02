@@ -45,7 +45,6 @@ public class SignUpActivity extends AppCompatActivity implements View.OnClickLis
             @Override
             public void onResponse(Call<KeyResponse> call, Response<KeyResponse> response) {
                 if(response.isSuccessful()){
-                    //TODO--Binh this is Key
                     mKey = response.body().getData();
                     Toast.makeText(getBaseContext(), mKey,
                             Toast.LENGTH_SHORT).show();
@@ -94,9 +93,9 @@ public class SignUpActivity extends AppCompatActivity implements View.OnClickLis
                     Log.d("RSA",e.toString());
                 }
                 //End
-
-                //TODO--Fix ref_cat_id for admin
-                mService.signUp(name,encryptedPass,pbKey,1).enqueue(new Callback<SignupRequest>() {
+                int userCat = Integer.parseInt(PreferenceUtils.getStringPref(getBaseContext(),ExtraKey.USER_CAT,"1"));
+                //TODO--DONE -- Fix ref_cat_id for admin
+                mService.signUp(name,encryptedPass,pbKey,userCat).enqueue(new Callback<SignupRequest>() {
 //                                    mService.signUp("Me","Me",pbKey,1).enqueue(new Callback<SignupRequest>() {
 
                         @Override

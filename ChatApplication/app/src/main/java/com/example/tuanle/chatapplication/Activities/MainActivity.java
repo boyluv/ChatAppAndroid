@@ -51,7 +51,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 //            showListConservation();
 //        }
 
-
+        findViewById(R.id.signup_admin_btn).setOnClickListener(this);
     }
     private void signUp() {
         Log.d("bug","sign up");
@@ -143,6 +143,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         });
                     }
                 break;
+            case R.id.signup_admin_btn:
+                Intent intent = new Intent(this, CreateCategory.class);
+                startActivity(intent);
             default:
                 break;
         }

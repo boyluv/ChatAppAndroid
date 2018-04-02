@@ -14,6 +14,7 @@ import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.spec.InvalidKeySpecException;
+import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 
 import javax.crypto.BadPaddingException;
@@ -49,7 +50,7 @@ public final class CrRSA {
     */
     public static void generateKey()
             throws NoSuchAlgorithmException {
-        kpg = KeyPairGenerator.getInstance("RSA");
+        kpg = KeyPairGenerator.getInstance(cryptMode);
         kpg.initialize(1024);
         kp = kpg.genKeyPair();
         publicKey = kp.getPublic();
@@ -58,11 +59,43 @@ public final class CrRSA {
     }
 
     public static String getPublicKey(PublicKey publicKey) {
-        return encodedProcess(publicKey.getEncoded());
+        return ByteArrayToHex(publicKey.getEncoded());
     }
 
     public static String getPrivateKey(PrivateKey privateKey) {
-        return encodedProcess(privateKey.getEncoded());
+        return ByteArrayToHex(privateKey.getEncoded());
+    }
+
+    /*
+    --------------------------------------------------
+    Hex & Byte Array Process
+    HexToByteArray
+    ByteArrayToHex
+    --------------------------------------------------
+    */
+    private static String ByteArrayToHex(byte[] bytesArray){
+        StringBuffer strBuffer = new StringBuffer(bytesArray.length * 2);
+        int i = 0;
+        while (i < bytesArray.length){
+            int v = bytesArray[i] & 0xff;
+            if (v < 16) strBuffer.append('0');
+            strBuffer.append(Integer.toHexString(v));
+            i++;
+        }
+        String getHexString = strBuffer.toString().toUpperCase();
+        return getHexString;
+    }
+
+    private static byte[] HexToByteArray(String str) {
+        byte[] bytesArray = new byte[str.length() / 2];
+        int i = 0;
+        while (i < bytesArray.length) {
+            int index = i * 2;
+            int v = Integer.parseInt(str.substring(index, index + 2), 16);
+            bytesArray[i] = (byte)v;
+            i++;
+        }
+        return bytesArray;
     }
 
     /*
@@ -74,12 +107,37 @@ public final class CrRSA {
     */
     private static String encodedProcess(byte[] cipher) {
         //NO_WRAP means "\n at the end"
-        return Base64.encodeToString(cipher, Base64.NO_WRAP);
+        return Base64.encodeToString(cipher, Base64.DEFAULT);
     }
 
     private static byte[] decodedProcess(String encodedCipher) {
         //NO_WRAP means "\n at the end"
-        return Base64.decode(encodedCipher, Base64.NO_WRAP);
+        return Base64.decode(encodedCipher, Base64.DEFAULT);
+    }
+
+    /*
+    --------------------------------------------------
+    Encoding & Decoding Process
+    Using Base64
+    Base64.NO_WRAP for "\n" at the end
+    --------------------------------------------------
+    */
+    private static PublicKey StringToPublicKey(String publicKey)
+        throws NoSuchAlgorithmException, InvalidKeySpecException {
+        byte[] publicKeyBytes = HexToByteArray(publicKey);
+        X509EncodedKeySpec keySpec = new X509EncodedKeySpec(publicKeyBytes);
+        KeyFactory keyFactory = KeyFactory.getInstance(cryptMode);
+        PublicKey Key = keyFactory.generatePublic(keySpec);
+        return Key;
+    }
+
+    private static PrivateKey StringToPrivateKey(String privateKey)
+        throws NoSuchAlgorithmException, InvalidKeySpecException {
+        byte[] privateKeyBytes = HexToByteArray(privateKey);
+        PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(privateKeyBytes);
+        KeyFactory keyFactory = KeyFactory.getInstance(cryptMode);
+        PrivateKey Key = keyFactory.generatePrivate(keySpec);
+        return Key;
     }
 
     /*
@@ -88,42 +146,39 @@ public final class CrRSA {
     Using "RSA/NONE/OAEPWithSHA256AndMGF1Padding" transformation
     --------------------------------------------------
     */
-    public static byte[] encryptedProcess(final String plain, PublicKey publicKey)
-            throws NoSuchAlgorithmException, NoSuchPaddingException,
-            InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
-        Cipher cipher = Cipher.getInstance("RSA");
-        cipher.init(Cipher.ENCRYPT_MODE, publicKey);
+    public static byte[] encryptedProcess(final String plain, String publicKey)
+            throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException,
+            InvalidKeySpecException, IllegalBlockSizeException, BadPaddingException {
+        PublicKey Key = StringToPublicKey(publicKey);
+        Cipher cipher = Cipher.getInstance(cryptMode);
+        cipher.init(Cipher.ENCRYPT_MODE, Key);
         byte[] encryptedBytes = cipher.doFinal(plain.getBytes());
-        //System.out.println("Encrypted?????" + org.apache.commons.codec.binary.Hex.encodeHexString(encryptedBytes));
         return encryptedBytes;
     }
 
-    public static byte[] decryptedProcess(final byte[] encryptedBytes, PrivateKey privateKey)
-            throws NoSuchAlgorithmException, NoSuchPaddingException,
+    public static byte[] decryptedProcess(final byte[] encryptedBytes, String privateKey)
+            throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeySpecException,
             InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
-        Cipher cipher1 = Cipher.getInstance("RSA");
-        cipher1.init(Cipher.DECRYPT_MODE, privateKey);
-        byte[] decryptedBytes = cipher1.doFinal(encryptedBytes);
+        PrivateKey Key = StringToPrivateKey(privateKey);
+        Cipher cipher = Cipher.getInstance(cryptMode);
+        cipher.init(Cipher.DECRYPT_MODE, Key);
+        byte[] decryptedBytes = cipher.doFinal(encryptedBytes);
         return decryptedBytes;
     }
 
-
-    public static final String encryptRSA(String plainText, PublicKey publicKey)
-            throws NoSuchAlgorithmException, NoSuchPaddingException,
+    public static final String encryptRSA(String plainText, String publicKey)
+            throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeySpecException,
             InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
         byte[] cipherBytes = encryptedProcess(plainText, publicKey);
-        String cipherText = encodedProcess(cipherBytes);
-//        Log.d("cipher","Pub d: "+cipherText);
-
+        String cipherText = ByteArrayToHex(cipherBytes);
         return cipherText;
     }
 
-    public static final String decryptRSA(String cipherText, PrivateKey privateKey)
-            throws NoSuchAlgorithmException, NoSuchPaddingException,
+    public static final String decryptRSA(String cipherText, String privateKey)
+            throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeySpecException,
             InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
-        byte[] cipherBytes = decodedProcess(cipherText);
+        byte[] cipherBytes = HexToByteArray(cipherText);
         String plainText = new String(decryptedProcess(cipherBytes, privateKey));
-        Log.d("cipher","Plaintext: "+plainText);
         return plainText;
     }
 

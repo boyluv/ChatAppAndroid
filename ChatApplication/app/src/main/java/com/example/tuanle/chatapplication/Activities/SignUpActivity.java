@@ -9,11 +9,14 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.example.tuanle.chatapplication.Algorithm.CrDES;
+import com.example.tuanle.chatapplication.Algorithm.CrRSA;
 import com.example.tuanle.chatapplication.R;
 import com.example.tuanle.chatapplication.Request.SignupRequest;
 import com.example.tuanle.chatapplication.Response.KeyResponse;
 import com.example.tuanle.chatapplication.Retrofit.ApiUtils;
 import com.example.tuanle.chatapplication.Retrofit.SOService;
+import com.example.tuanle.chatapplication.Utils.Constants.ExtraKey;
+import com.example.tuanle.chatapplication.Utils.PreferenceUtils;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -44,17 +47,20 @@ public class SignUpActivity extends AppCompatActivity implements View.OnClickLis
                 if(response.isSuccessful()){
                     //TODO--Binh this is Key
                     mKey = response.body().getData();
-//                    Toast.makeText(getBaseContext(), mKey,
-//                            Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getBaseContext(), mKey,
+                            Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(Call<KeyResponse> call, Throwable t) {
-
+                Toast.makeText(getBaseContext(), mKey,
+                        Toast.LENGTH_SHORT).show();
             }
         });
     }
+
+
     @Override
     public void onClick(View v) {
         switch (v.getId()){
@@ -65,15 +71,40 @@ public class SignUpActivity extends AppCompatActivity implements View.OnClickLis
                 //TODO-----Binh
                 String name = edtUserName.getText().toString();
                 String pass = edtPass.getText().toString();
-
+                //Use DES encrypt password
                 String encryptedPass = CrDES.encryptDES(mKey,pass);
-                mService.signUp(name,encryptedPass,true).enqueue(new Callback<SignupRequest>() {
-                    @Override
+                String pbKey ="";
+                String pvKey ="";
+
+                //Start create RSA
+                try{
+                    CrRSA.generateKey();
+                    pbKey = CrRSA.getPublicKey(CrRSA.publicKey);
+                    pvKey = CrRSA.getPrivateKey(CrRSA.privateKey);
+
+                    //TODO -- Tuan --Save to server
+                    Log.d("RSA","Public key: "+pbKey);
+                    //TODO -- Tuan --Save sharepreference with AES encrypt
+                    Log.d("RSA","Private key: "+pvKey);
+
+                    PreferenceUtils.saveStringPref(getBaseContext(), ExtraKey.PB_KEY,pbKey);
+                    PreferenceUtils.saveStringPref(getBaseContext(),ExtraKey.PV_KEY,pvKey);
+
+                }catch (Exception e){
+                    Log.d("RSA",e.toString());
+                }
+                //End
+
+                //TODO--Fix ref_cat_id for admin
+                mService.signUp(name,encryptedPass,pbKey,1).enqueue(new Callback<SignupRequest>() {
+//                                    mService.signUp("Me","Me",pbKey,1).enqueue(new Callback<SignupRequest>() {
+
+                        @Override
                     public void onResponse(Call<SignupRequest> call, Response<SignupRequest> response) {
                         if(response.isSuccessful()){
                             Toast.makeText(getBaseContext(), "Sign up success ",
                                     Toast.LENGTH_SHORT).show();
-                            finish();
+
                         }
 
                         else

@@ -8,10 +8,6 @@ import com.google.gson.annotations.SerializedName;
  */
 
 public class SignupRequest {
-    @SerializedName("id")
-    @Expose
-    private int id;
-
     @SerializedName("name")
     @Expose
     private String name;
@@ -20,14 +16,18 @@ public class SignupRequest {
     @Expose
     private String password;
 
-    @SerializedName("isUser")
+    @SerializedName("pb_key")
     @Expose
-    private boolean isUser;
+    private String pb_key;
 
-    public SignupRequest(int id, String name, String password, boolean isUser) {
-        this.id = id;
+    @SerializedName("ref_cat_id")
+    @Expose
+    private int ref_cat_id;
+
+    public SignupRequest(String name, String password, String pb_key, int ref_cat_id) {
         this.name = name;
         this.password = password;
-        this.isUser = isUser;
+        this.pb_key = pb_key;
+        this.ref_cat_id = ref_cat_id;
     }
 }

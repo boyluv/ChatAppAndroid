@@ -1,5 +1,8 @@
 package com.example.tuanle.chatapplication.Activities;
 
+import android.content.Intent;
+import android.os.AsyncTask;
+import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -59,26 +62,86 @@ public class DetailConservationActivity extends AppCompatActivity implements Vie
         mAdapter = new DetailConservationAdapter(getBaseContext(),new ArrayList<Message>());
         mRecyclerView.setAdapter(mAdapter);
 
-        loadMessage();
+//        loadMessage();
 
         try{
             CrRSA.generateKey();
             String a = CrRSA.getPublicKey(CrRSA.publicKey);
             String b = CrRSA.getPrivateKey(CrRSA.privateKey);
-            Log.d("KeyCryp","Pub a: "+a);
-            Log.d("KeyCryp","Pri b: "+b);
-            String msg = "hello";
 
-            String e = CrRSA.encryptRSA(msg, CrRSA.publicKey);
-            Log.d("KeyCrype","Pri e: "+e);
-            String d = CrRSA.decryptRSA(msg, CrRSA.privateKey);
-            Log.d("KeyCrypd","Pub d: "+d);
+
+            //TODO -- Tuan --Save to server
+            Log.d("KeyCryp Public","Pub a: "+a);
+            //TODO -- Tuan --Save sharepreference with AES encrypt
+            Log.d("KeyCryp Private","Pri b: "+b);
+
+
+            //Sender
+            String msg = "hello, Doraemon";
+            //TODO -- Tuan --Get public key a from server
+            String e = CrRSA.encryptRSA(msg, a);
+            Log.d("Encrypted = ",e);
+
+
+            //TODO--Receiver private key b from mobile with AES decrypt
+            String d = CrRSA.decryptRSA(e, b);
+            Log.d("Decrypted = ", d);
 
         }
         catch (Exception e){
             Log.d("Encryt",e.toString());
         }
+
+        new ListenConversation().execute("","","");
+
     }
+    private Boolean isHaveNotification;
+    private class ListenConversation extends AsyncTask<String, String, String> {
+        protected String doInBackground(String... strings) {
+            isHaveNotification = false;
+            Log.d("Request","Start");
+
+            mService = ApiUtils.getSOService();
+            //This is your id
+            int idUser = Integer.parseInt(PreferenceUtils.getStringPref(getBaseContext(),ExtraKey.USER_ID,"1"));
+            mService.getDetailConvo(curConvoId).enqueue(new Callback<DetailConvoResponse>() {
+                @Override
+                public void onResponse(Call<DetailConvoResponse> call, Response<DetailConvoResponse> response) {
+                    if(response.isSuccessful()) {
+                        if(response.body().isEmpty()){
+                            Log.d("listConvo", "Get Inside");
+                        }
+                        else {
+                            Log.d("listConvo", response.body().getResults().get(0).getUser_name());
+                            mAdapter.setConservation(new ArrayList<Message>(response.body().getResults()));
+                            mAdapter.notifyDataSetChanged();
+                        }
+                        new ListenConversation().execute("","","");
+
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<DetailConvoResponse> call, Throwable t) {
+
+                }
+            });
+            Log.d("Request","End");
+            return null;
+            //else
+            //    return null;
+        }
+
+        protected void onProgressUpdate(String... String) {
+
+        }
+
+        protected void onPostExecute(String message) {
+
+        }
+
+    }
+
 
     private void loadMessage(){
         mService = ApiUtils.getSOService();
@@ -86,9 +149,14 @@ public class DetailConservationActivity extends AppCompatActivity implements Vie
             @Override
             public void onResponse(Call<DetailConvoResponse> call, Response<DetailConvoResponse> response) {
                 if(response.isSuccessful()) {
-                    Log.d("listConvo", response.body().getResults().get(0).getUser_name());
-                    mAdapter.setConservation(new ArrayList<Message>(response.body().getResults()));
-                    mAdapter.notifyDataSetChanged();
+                    if(response.body().isEmpty()){
+                        Log.d("listConvo", "Get Inside");
+                    }
+                    else {
+                        Log.d("listConvo", response.body().getResults().get(0).getUser_name());
+                        mAdapter.setConservation(new ArrayList<Message>(response.body().getResults()));
+                        mAdapter.notifyDataSetChanged();
+                    }
                 }
             }
 

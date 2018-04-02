@@ -1,15 +1,25 @@
 package com.example.tuanle.chatapplication.Activities;
 
+import android.content.Intent;
+import android.os.AsyncTask;
+import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.View;
+import android.widget.Toast;
 
 import com.example.tuanle.chatapplication.Adapters.ConservationListAdapter;
 import com.example.tuanle.chatapplication.R;
 import com.example.tuanle.chatapplication.Response.ConvoResponse;
+import com.example.tuanle.chatapplication.Response.CreateConvoResponse;
+import com.example.tuanle.chatapplication.Response.KeyResponse;
 import com.example.tuanle.chatapplication.Response.ListConvoResponse;
+import com.example.tuanle.chatapplication.Response.RemoveRequestResponse;
+import com.example.tuanle.chatapplication.Response.RequestCommingResponse;
+import com.example.tuanle.chatapplication.Response.RequestDetail;
 import com.example.tuanle.chatapplication.Retrofit.ApiUtils;
 import com.example.tuanle.chatapplication.Retrofit.SOService;
 import com.example.tuanle.chatapplication.Utils.Constants.ExtraKey;
@@ -55,6 +65,171 @@ public class ConservationListActivity extends AppCompatActivity {
         mRecyclerView.setAdapter(mAdapter);
         loadListConvo();
 
+        findViewById(R.id.btn_send).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                sendRequestToChat();
+            }
+        });
+        new ListenRequest().execute("","","");
+
+
+    }
+    private void sendRequestToChat(){
+        mService = ApiUtils.getSOService();
+        int idUser = Integer.parseInt(PreferenceUtils.getStringPref(getBaseContext(),ExtraKey.USER_ID,"1"));
+        //TODO--Get Receiver Id
+        mService.sendRequest(idUser,2,"First_CurKey").enqueue(new Callback<RequestDetail>() {
+            @Override
+            public void onResponse(Call<RequestDetail> call, Response<RequestDetail> response) {
+                Log.d("Request","Send success");
+            }
+
+            @Override
+            public void onFailure(Call<RequestDetail> call, Throwable t) {
+
+            }
+        });
+    }
+    //TODO--Important
+    private String tt="temp";
+    private Boolean isHaveNotification;
+
+    RequestCommingResponse curResponse = null;
+    private class ListenRequest extends AsyncTask<String, String, String> {
+        protected String doInBackground(String... strings) {
+            isHaveNotification = false;
+            Log.d("Request","Start");
+
+            mService = ApiUtils.getSOService();
+            //This is your id
+            int idUser = Integer.parseInt(PreferenceUtils.getStringPref(getBaseContext(),ExtraKey.USER_ID,"1"));
+            mService.requestComming(idUser).enqueue(new Callback<RequestCommingResponse>() {
+                @Override
+                public void onResponse(Call<RequestCommingResponse> call, Response<RequestCommingResponse> response) {
+                    Log.d("Request","inside");
+                    Log.d("Request","Receive " + response.body().isHaveNotification());
+                    isHaveNotification = response.body().isHaveNotification();
+                    if(isHaveNotification){
+                        curResponse  = response.body();
+                        Log.d("Request","Change activity to "+curResponse.getData().get(0).getReq_sender());
+
+                        //Delete and change activity
+                        String mess = curResponse.getData().get(0).getMessagedata();
+                        final String[] separated = mess.split("_");
+                        if(separated[0].equals("First")){
+                            final int curUserId = Integer.parseInt(PreferenceUtils.getStringPref(getBaseContext(),ExtraKey.USER_ID,"1"));
+
+                            int curCat = Integer.parseInt(PreferenceUtils.getStringPref(getBaseContext(),ExtraKey.USER_CAT,"1"));
+                            int curConvoBy = Integer.parseInt(curResponse.getData().get(0).getReq_sender());
+                            //Create Convo_id
+
+                            //TODO--Right now
+                            SOService createService = ApiUtils.getSOService();
+                            createService.createConvo(curCat,curConvoBy).enqueue(new Callback<CreateConvoResponse>() {
+                                @Override
+                                public void onResponse(Call<CreateConvoResponse> call, Response<CreateConvoResponse> response) {
+                                    if(response.isSuccessful()){
+
+                                        final int convo_id = response.body().getConvo_id();
+                                        //Delete Request
+                                        SOService curService = ApiUtils.getSOService();
+                                        curService.deleteRequest(curUserId).enqueue(new Callback<RemoveRequestResponse>() {
+                                            @Override
+                                            public void onResponse(Call<RemoveRequestResponse> call, Response<RemoveRequestResponse> response) {
+                                                //Add new Request
+                                                mService = ApiUtils.getSOService();
+                                                mService.sendRequest(1,2,"Second_CurKey_1").enqueue(new Callback<RequestDetail>() {
+                                                    @Override
+                                                    public void onResponse(Call<RequestDetail> call, Response<RequestDetail> response) {
+                                                        Log.d("Request","Send success");
+
+                                                        Intent intent = new Intent(getBaseContext(), DetailConservationActivity.class);
+                                                        Log.d("DetailConvo", "This is convo Id " + convo_id+"");
+                                                        intent.putExtra(ExtraKey.CONSERVATION_ID, convo_id);
+                                                        startActivity(intent);
+
+                                                        Toast.makeText(getBaseContext(),"Now you (Receiver) can change activity to "+convo_id,Toast.LENGTH_LONG).show();
+                                                    }
+
+                                                    @Override
+                                                    public void onFailure(Call<RequestDetail> call, Throwable t) {
+
+                                                    }
+                                                });
+                                            }
+
+                                            @Override
+                                            public void onFailure(Call<RemoveRequestResponse> call, Throwable t) {
+
+                                            }
+                                        });
+                                    }
+                                }
+
+                                @Override
+                                public void onFailure(Call<CreateConvoResponse> call, Throwable t) {
+
+                                }
+                            });
+
+                        }
+                        else if(separated[0].equals("Second")){
+                            if(separated[1].equals("CurKey"))
+                            {
+                                int curUserId = Integer.parseInt(PreferenceUtils.getStringPref(getBaseContext(),ExtraKey.USER_ID,"1"));
+                                // curUserId = 1;
+                                SOService curService = ApiUtils.getSOService();
+                                curService.deleteRequest(curUserId).enqueue(new Callback<RemoveRequestResponse>() {
+                                    @Override
+                                    public void onResponse(Call<RemoveRequestResponse> call, Response<RemoveRequestResponse> response) {
+                                        int convo_id = Integer.parseInt(separated[2]);
+                                        //Change to Activity with that id
+                                        Intent intent = new Intent(getBaseContext(), DetailConservationActivity.class);
+                                        Log.d("DetailConvo", "This is convo Id " + convo_id);
+                                        intent.putExtra(ExtraKey.CONSERVATION_ID, convo_id+"");
+                                        startActivity(intent);
+                                        Toast.makeText(getBaseContext(),"Now you (Sender) can change activity to "+convo_id,Toast.LENGTH_LONG).show();
+                                    }
+
+                                    @Override
+                                    public void onFailure(Call<RemoveRequestResponse> call, Throwable t) {
+
+                                    }
+                                });
+
+                            }
+                        }
+                    }
+                    else{
+                        new Handler().postDelayed(new Runnable() {
+                            public void run() {
+                                new ListenRequest().execute("","","");
+                            }
+                        }, 5000);
+                    }
+                        curResponse = null;
+                }
+
+                @Override
+                public void onFailure(Call<RequestCommingResponse> call, Throwable t) {
+                    Log.d("Request","failed inside");
+
+                }
+            });
+            Log.d("Request","End");
+            return null;
+            //else
+            //    return null;
+        }
+
+        protected void onProgressUpdate(String... String) {
+
+        }
+
+        protected void onPostExecute(String message) {
+
+        }
 
     }
 
@@ -82,5 +257,6 @@ public class ConservationListActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         loadListConvo();
+        new ListenRequest().execute("","","");
     }
 }

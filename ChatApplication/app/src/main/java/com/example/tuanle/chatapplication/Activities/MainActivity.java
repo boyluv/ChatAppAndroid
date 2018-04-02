@@ -29,25 +29,33 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private EditText userName;
     private EditText password;
     private String mKey;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        String userId = PreferenceUtils.getStringPref(getBaseContext(),ExtraKey.USER_ID,null);
+
         mKey = null;
         getKey();
-        //If already Log in change to inside
-        if(userId !=null){
-            showListConservation();
-        }
+
+        //String userId = PreferenceUtils.getStringPref(getBaseContext(),ExtraKey.USER_ID,null);
         userName = (EditText) findViewById(R.id.edt_name);
         password = (EditText) findViewById(R.id.edt_password);
-        btn_signIn =  findViewById(R.id.signin_btn);
-        btn_signUp =  findViewById(R.id.signup_btn);
+
+        btn_signIn = (Button) findViewById(R.id.signin_btn);
+        btn_signUp = (Button) findViewById(R.id.signup_btn);
         btn_signIn.setOnClickListener(this);
         btn_signUp.setOnClickListener(this);
+        //If already Log in change to inside
+//        if(userId !=null){
+//            showListConservation();
+//        }
+
+
     }
     private void signUp() {
+        Log.d("bug","sign up");
+
         Intent intent = new Intent(this, SignUpActivity.class);
 //        send Intent with message if you need
 //        intent.putExtra(EXTRA_MESSAGE, message);
@@ -87,6 +95,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onClick(View v) {
         switch (v.getId()){
+            case R.id.signup_btn:
+                signUp();
+                break;
             case R.id.signin_btn:
                 if (mKey == null)
                     getKey();
@@ -102,6 +113,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                         try{
                                             Log.d("UserLogin", response.body().getResults().get(0).getUser_id());
                                             PreferenceUtils.saveStringPref(getBaseContext(),ExtraKey.USER_ID,response.body().getResults().get(0).getUser_id());
+                                            PreferenceUtils.saveStringPref(getBaseContext(),ExtraKey.USER_CAT,response.body().getResults().get(0).getRef_cat_id()+"");
                                             PreferenceUtils.saveStringPref(getBaseContext(),ExtraKey.USER_NAME,userName.getText().toString());
 
                                             //Start new Activity , change to list conservation
@@ -130,9 +142,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             }
                         });
                     }
-                break;
-            case R.id.signup_btn:
-                signUp();
                 break;
             default:
                 break;

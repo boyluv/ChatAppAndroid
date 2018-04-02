@@ -14,8 +14,16 @@ public class DetailConvoResponse {
     @Expose
     private String status;
 
+    @SerializedName("isEmpty")
+    @Expose
+    private boolean isEmpty;
+
     public List<Message> getResults() {
         return results;
+    }
+
+    public boolean isEmpty() {
+        return isEmpty;
     }
 
     public void setResults(List<Message> results) {

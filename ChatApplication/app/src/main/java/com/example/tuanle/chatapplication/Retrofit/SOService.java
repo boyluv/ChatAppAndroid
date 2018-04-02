@@ -3,12 +3,17 @@ package com.example.tuanle.chatapplication.Retrofit;
 import com.example.tuanle.chatapplication.Request.MessageRequest;
 import com.example.tuanle.chatapplication.Request.SignupRequest;
 import com.example.tuanle.chatapplication.Response.ConvoResponse;
+import com.example.tuanle.chatapplication.Response.CreateConvoResponse;
 import com.example.tuanle.chatapplication.Response.DetailConvoResponse;
 import com.example.tuanle.chatapplication.Response.KeyResponse;
 import com.example.tuanle.chatapplication.Response.ListConvoResponse;
 import com.example.tuanle.chatapplication.Response.LogInResponse;
+import com.example.tuanle.chatapplication.Response.RemoveRequestResponse;
+import com.example.tuanle.chatapplication.Response.RequestCommingResponse;
+import com.example.tuanle.chatapplication.Response.RequestDetail;
 
 import retrofit2.Call;
+import retrofit2.http.DELETE;
 import retrofit2.http.GET;
 import retrofit2.http.POST;
 import retrofit2.http.Path;
@@ -36,7 +41,7 @@ public interface SOService {
     //TODO--Fix id number by remove it
     @POST("/user/add")
     Call<SignupRequest> signUp(@Query("name") String name,
-                               @Query("pass") String pass,@Query("isUser") boolean isUser);
+                               @Query("pass") String pass,@Query("pb_key") String pb_key,@Query("ref_cat_id") int ref_cat_id);
 
     //Add new message
     //TODO--Fix id number by remove it
@@ -47,4 +52,21 @@ public interface SOService {
     //Log in and return user id
     @GET("/key")
     Call<KeyResponse> getKey();
+
+    //Get all of your request
+    @GET("/request/{id}")
+    Call<RequestCommingResponse> requestComming(@Path("id") int id);
+
+    //Add new Request
+    @POST("/request/add")
+    Call<RequestDetail> sendRequest(@Query("req_sender") int req_sender,
+                                    @Query("req_receiver") int req_receiver, @Query("message") String message);
+
+    //Get all of your request
+    @DELETE("/request/remove/{id}")
+    Call<RemoveRequestResponse> deleteRequest(@Path("id") int id);
+
+    @POST("/convoadd")
+    Call<CreateConvoResponse> createConvo(@Query("convo_cat") int convo_cat,
+                                     @Query("convo_by") int convo_by);
 }

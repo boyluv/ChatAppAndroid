@@ -12,6 +12,7 @@ import com.example.tuanle.chatapplication.Response.LogInResponse;
 import com.example.tuanle.chatapplication.Response.RemoveRequestResponse;
 import com.example.tuanle.chatapplication.Response.RequestCommingResponse;
 import com.example.tuanle.chatapplication.Response.RequestDetail;
+import com.example.tuanle.chatapplication.Response.RootCreateConvoResponse;
 
 import retrofit2.Call;
 import retrofit2.http.DELETE;
@@ -67,9 +68,9 @@ public interface SOService {
     @DELETE("/request/remove/{id}")
     Call<RemoveRequestResponse> deleteRequest(@Path("id") int id);
 
-    @GET("/convoadd")
-    Call<CreateConvoResponse> createConvo(@Query("convo_cat") int convo_cat,
-                                     @Query("convo_by") int convo_by);
+    @POST("/convoadd")
+    Call<RootCreateConvoResponse> createConvo(@Query("convo_cat") int convo_cat,
+                                              @Query("convo_by") int convo_by);
 
     @POST("/cate/add")
     Call<CreateCategoryResponse> createCategory(@Query("cat_name") String cat_name,

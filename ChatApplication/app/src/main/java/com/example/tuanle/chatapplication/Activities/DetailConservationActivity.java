@@ -39,6 +39,7 @@ public class DetailConservationActivity extends AppCompatActivity implements Vie
     private EditText mMessage;
     private int curConvoId;
     private int userId;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

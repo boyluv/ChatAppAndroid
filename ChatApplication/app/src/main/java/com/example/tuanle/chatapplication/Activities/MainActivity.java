@@ -9,6 +9,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.example.tuanle.chatapplication.Algorithm.CrAES;
 import com.example.tuanle.chatapplication.Algorithm.CrDES;
 import com.example.tuanle.chatapplication.R;
 import com.example.tuanle.chatapplication.Response.CreateConvoResponse;
@@ -37,6 +38,22 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+
+        try{
+            String mes = "Hello World";
+            String key = "YACATEAM";
+            Log.d("AES","Begin");
+            String encrypt = CrAES.encryptAES(key,mes);
+            Log.d("AES","Encrypt " + encrypt);
+            String decrypted= CrAES.decryptAES(key,encrypt);
+            Log.d("AES","Dencrypt " + decrypted);
+
+
+        }
+        catch (Exception e){
+            Log.d("AES","Decrypt failed");
+        }
+
         mKey = null;
         getKey();
 
@@ -52,6 +69,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 //        if(userId !=null){
 //            showListConservation();
 //        }
+        PreferenceUtils.saveStringPref(getBaseContext(),ExtraKey.USER_CAT,"1");
 
         findViewById(R.id.signup_admin_btn).setOnClickListener(this);
     }
@@ -154,5 +172,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        PreferenceUtils.saveStringPref(getBaseContext(),ExtraKey.USER_CAT,"1");
 
+    }
 }

@@ -14,6 +14,7 @@ import android.widget.ImageButton;
 import android.widget.Toast;
 
 import com.example.tuanle.chatapplication.Adapters.DetailConservationAdapter;
+import com.example.tuanle.chatapplication.Algorithm.CrAES;
 import com.example.tuanle.chatapplication.Algorithm.CrRSA;
 import com.example.tuanle.chatapplication.R;
 import com.example.tuanle.chatapplication.Request.MessageRequest;
@@ -65,33 +66,37 @@ public class DetailConservationActivity extends AppCompatActivity implements Vie
 
 //        loadMessage();
 
-        try{
-            CrRSA.generateKey();
-            String a = CrRSA.getPublicKey(CrRSA.publicKey);
-            String b = CrRSA.getPrivateKey(CrRSA.privateKey);
+        //GET Key
+        //PreferenceUtils.saveStringPref(mContext,""+userId+"_"+idAdmin,keyAES);
 
-
-            //TODO -- Tuan --Save to server
-            Log.d("KeyCryp Public","Pub a: "+a);
-            //TODO -- Tuan --Save sharepreference with AES encrypt
-            Log.d("KeyCryp Private","Pri b: "+b);
-
-
-            //Sender
-            String msg = "hello, Doraemon";
-            //TODO -- Tuan --Get public key a from server
-            String e = CrRSA.encryptRSA(msg, a);
-            Log.d("Encrypted = ",e);
-
-
-            //TODO--Receiver private key b from mobile with AES decrypt
-            String d = CrRSA.decryptRSA(e, b);
-            Log.d("Decrypted = ", d);
-
-        }
-        catch (Exception e){
-            Log.d("Encryt",e.toString());
-        }
+        //String keyAES = PreferenceUtils.getStringPref(getBaseContext(),)
+//        try{
+//            CrRSA.generateKey();
+//            String a = CrRSA.getPublicKey(CrRSA.publicKey);
+//            String b = CrRSA.getPrivateKey(CrRSA.privateKey);
+//
+//
+//            //TODO -- Tuan --Save to server
+//            Log.d("KeyCryp Public","Pub a: "+a);
+//            //TODO -- Tuan --Save sharepreference with AES encrypt
+//            Log.d("KeyCryp Private","Pri b: "+b);
+//
+//
+//            //Sender
+//            String msg = "hello, Doraemon";
+//            //TODO -- Tuan --Get public key a from server
+//            String e = CrRSA.encryptRSA(msg, a);
+//            Log.d("Encrypted = ",e);
+//
+//
+//            //TODO--Receiver private key b from mobile with AES decrypt
+//            String d = CrRSA.decryptRSA(e, b);
+//            Log.d("Decrypted = ", d);
+//
+//        }
+//        catch (Exception e){
+//            Log.d("Encryt",e.toString());
+//        }
 
         new ListenConversation().execute("","","");
 
@@ -175,14 +180,24 @@ public class DetailConservationActivity extends AppCompatActivity implements Vie
 //                mAdapter.setConservation(new ArrayList<Message>());
 //                mAdapter.notifyDataSetChanged();
                 final String mes = mMessage.getText().toString();
+                String dencrypted = "";
+                String key = PreferenceUtils.getStringPref(getBaseContext(),ExtraKey.KEY_AES,"");
+                try{
+                    dencrypted = CrAES.encryptAES(key,mes);
+
+                }
+                catch (Exception e){
+                    Log.d("AES","Decrypt failed");
+                }
+
                 mService =ApiUtils.getSOService();
                 //TODO------Update and remove id Message
-                mService.addMessage(mes ,curConvoId,userId).enqueue(new Callback<MessageRequest>() {
+                mService.addMessage(dencrypted ,curConvoId,userId).enqueue(new Callback<MessageRequest>() {
                     @Override
                     public void onResponse(Call<MessageRequest> call, Response<MessageRequest> response) {
                         if(response.isSuccessful()){
-                            Toast.makeText(getBaseContext(), "Send success " + mes,
-                                    Toast.LENGTH_SHORT).show();
+//                            Toast.makeText(getBaseContext(), "Send success " + encrypted,
+//                                    Toast.LENGTH_SHORT).show();
                             mMessage.setText("");
                             loadMessage();
                         }

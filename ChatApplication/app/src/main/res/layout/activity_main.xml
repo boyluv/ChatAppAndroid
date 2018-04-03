@@ -74,18 +74,9 @@
         android:layout_centerHorizontal="true"
         android:layout_below="@id/signup_btn"
         android:background="@color/colorPrimary"
-        android:text="Admin"
+        android:text="Signup as Admin"
         android:layout_width="120dp"
         android:layout_height="wrap_content"
         />
-    <Button
-        android:id="@+id/test_btn"
-        android:layout_marginTop="24dp"
-        android:layout_centerHorizontal="true"
-        android:layout_below="@id/signup_admin_btn"
-        android:background="@color/colorPrimary"
-        android:text="Admin"
-        android:layout_width="120dp"
-        android:layout_height="wrap_content"
-        />
+
 </RelativeLayout>

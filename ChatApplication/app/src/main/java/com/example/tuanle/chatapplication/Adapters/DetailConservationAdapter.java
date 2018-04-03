@@ -13,6 +13,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.tuanle.chatapplication.Algorithm.CrAES;
 import com.example.tuanle.chatapplication.R;
 import com.example.tuanle.chatapplication.Response.Message;
 import com.example.tuanle.chatapplication.Utils.Constants.ExtraKey;
@@ -40,7 +41,16 @@ public class DetailConservationAdapter extends RecyclerView.Adapter<DetailConser
     @Override
     public void onBindViewHolder(@NonNull ItemHolder holder, int position) {
         final Message curMessage = conservation.get(position);
-        holder.message.setText(curMessage.getRep_message());
+        String encryptedMes = curMessage.getRep_message();
+        String key = PreferenceUtils.getStringPref(context,ExtraKey.KEY_AES,"");
+        String encrypted = "";
+        try{
+            encrypted= CrAES.decryptAES(key,encryptedMes);
+        }
+        catch (Exception e){
+            Log.d("AES","Decrypt failed");
+        }
+        holder.message.setText(encrypted);
 
         holder.message.setOnClickListener(new View.OnClickListener() {
             @Override

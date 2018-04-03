@@ -12,15 +12,18 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.example.tuanle.chatapplication.Adapters.ConservationListAdapter;
+import com.example.tuanle.chatapplication.Algorithm.CrRSA;
 import com.example.tuanle.chatapplication.R;
 import com.example.tuanle.chatapplication.Response.ConvoResponse;
 import com.example.tuanle.chatapplication.Response.CreateConvoResponse;
 import com.example.tuanle.chatapplication.Response.KeyResponse;
+import com.example.tuanle.chatapplication.Response.ListAdminResponse;
 import com.example.tuanle.chatapplication.Response.ListConvoResponse;
 import com.example.tuanle.chatapplication.Response.RemoveRequestResponse;
 import com.example.tuanle.chatapplication.Response.RequestCommingResponse;
 import com.example.tuanle.chatapplication.Response.RequestDetail;
 import com.example.tuanle.chatapplication.Response.RootCreateConvoResponse;
+import com.example.tuanle.chatapplication.Response.RootListAdminResponse;
 import com.example.tuanle.chatapplication.Retrofit.ApiUtils;
 import com.example.tuanle.chatapplication.Retrofit.SOService;
 import com.example.tuanle.chatapplication.Utils.Constants.ExtraKey;
@@ -50,7 +53,6 @@ public class ConservationListActivity extends AppCompatActivity {
         Log.d("UserLogin", "New activity " + userId);
 
         mRecyclerView = (RecyclerView) findViewById(R.id.rv_conservation_lists);
-//        TODO
 //        mRvCategories = (RecyclerView) findViewById(R.id.rv_vertical_conservation_lists);
 
 //        //Initialize list categories
@@ -63,38 +65,40 @@ public class ConservationListActivity extends AppCompatActivity {
         //Initialize history chat
         mRecyclerView.setHasFixedSize(true);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-        mAdapter = new ConservationListAdapter(getBaseContext(),new ArrayList<ConvoResponse>());
+        String userCat = PreferenceUtils.getStringPref(getBaseContext(),ExtraKey.USER_CAT,null);
+        if(!userCat.equals("1"))
+            mAdapter = new ConservationListAdapter(getBaseContext(),new ArrayList<ConvoResponse>(),new ArrayList<ListAdminResponse>(),false);
+        else
+            mAdapter = new ConservationListAdapter(getBaseContext(),new ArrayList<ConvoResponse>(),new ArrayList<ListAdminResponse>(),true);
+
         mRecyclerView.setAdapter(mAdapter);
         loadListConvo();
 
-        findViewById(R.id.btn_send).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                sendRequestToChat();
-//                testMethod();
-            }
-        });
+//        findViewById(R.id.btn_send).setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                sendRequestToChat();
+////                testMethod();
+//            }
+//        });
         new ListenRequest().execute("","","");
-
-
     }
 
-    private void sendRequestToChat(){
-        mService = ApiUtils.getSOService();
-        int idUser = Integer.parseInt(PreferenceUtils.getStringPref(getBaseContext(),ExtraKey.USER_ID,"1"));
-        //TODO--Get Receiver Id
-        mService.sendRequest(idUser,9,"First_CurKey").enqueue(new Callback<RequestDetail>() {
-            @Override
-            public void onResponse(Call<RequestDetail> call, Response<RequestDetail> response) {
-                Log.d("Request","Send success");
-            }
-
-            @Override
-            public void onFailure(Call<RequestDetail> call, Throwable t) {
-
-            }
-        });
-    }
+//    private void sendRequestToChat(){
+//        mService = ApiUtils.getSOService();
+//        int idUser = Integer.parseInt(PreferenceUtils.getStringPref(getBaseContext(),ExtraKey.USER_ID,"1"));
+//        mService.sendRequest(idUser,9,"First_CurKey").enqueue(new Callback<RequestDetail>() {
+//            @Override
+//            public void onResponse(Call<RequestDetail> call, Response<RequestDetail> response) {
+//                Log.d("Request","Send success");
+//            }
+//
+//            @Override
+//            public void onFailure(Call<RequestDetail> call, Throwable t) {
+//
+//            }
+//        });
+//    }
     //TODO--Important
     private String tt="temp";
     private Boolean isHaveNotification;
@@ -124,7 +128,24 @@ public class ConservationListActivity extends AppCompatActivity {
                         String mess = curResponse.getData().get(0).getMessagedata();
                         final String[] separated = mess.split("_");
                         if(separated[0].equals("First")){
+
+                            //Get key decrypt and save AES key
+                            String encrypted = separated[1];
+                            String privateKey = PreferenceUtils.getStringPref(getBaseContext(),ExtraKey.PV_KEY,"");
+                            String keyAES="";
+                            //
+                            try{
+                                keyAES = CrRSA.decryptRSA(encrypted, privateKey);
+
+                            }
+                            catch (Exception e){
+                                Log.d("Encryt",e.toString());
+                            }
+
+                            //End
+
                             final int curUserId = Integer.parseInt(PreferenceUtils.getStringPref(getBaseContext(),ExtraKey.USER_ID,"1"));
+                            PreferenceUtils.saveStringPref(getBaseContext(),ExtraKey.KEY_AES,keyAES);
 
                             int curCat = Integer.parseInt(PreferenceUtils.getStringPref(getBaseContext(),ExtraKey.USER_CAT,"1"));
                             int curConvoBy = Integer.parseInt(curResponse.getData().get(0).getReq_sender());
@@ -146,7 +167,7 @@ public class ConservationListActivity extends AppCompatActivity {
                                                 //Add new Request
                                                 int idUser = Integer.parseInt(PreferenceUtils.getStringPref(getBaseContext(),ExtraKey.USER_ID,"1"));
                                                 mService = ApiUtils.getSOService();
-                                                mService.sendRequest(idUser,receiverInSecondRequest,"Second_CurKey_1").enqueue(new Callback<RequestDetail>() {
+                                                mService.sendRequest(idUser,receiverInSecondRequest,"Second_CurKey_"+convo_id).enqueue(new Callback<RequestDetail>() {
                                                     @Override
                                                     public void onResponse(Call<RequestDetail> call, Response<RequestDetail> response) {
                                                         Log.d("Request","Send success");
@@ -246,21 +267,44 @@ public class ConservationListActivity extends AppCompatActivity {
     private void loadListConvo(){
         mService = ApiUtils.getSOService();
         String userId = PreferenceUtils.getStringPref(getBaseContext(),ExtraKey.USER_ID,null);
-        mService.getListConvo(userId).enqueue(new Callback<ListConvoResponse>() {
-            @Override
-            public void onResponse(Call<ListConvoResponse> call, Response<ListConvoResponse> response) {
-                if(response.isSuccessful()) {
-                    Log.d("listConvo", response.body().getResults().get(0).getRep_message().toString());
-                    mAdapter.setListConvo(new ArrayList<>(response.body().getResults()));
+        String userCat = PreferenceUtils.getStringPref(getBaseContext(),ExtraKey.USER_CAT,null);
+        if(!userCat.equals("1")){
+            mService.getListConvo(userCat).enqueue(new Callback<ListConvoResponse>() {
+                @Override
+                public void onResponse(Call<ListConvoResponse> call, Response<ListConvoResponse> response) {
+                    if(response.isSuccessful()) {
+                        if(response.body().getResults().size()>0){
+                            Log.d("listConvo", response.body().getResults().get(0).getRep_message().toString());
+                            mAdapter.setListConvo(new ArrayList<>(response.body().getResults()));
+                            mAdapter.notifyDataSetChanged();
+                        }
+
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<ListConvoResponse> call, Throwable t) {
+
+                }
+            });
+        }
+        else {
+            //Load for user
+            mService.getListAdmin().enqueue(new Callback<RootListAdminResponse>() {
+                @Override
+                public void onResponse(Call<RootListAdminResponse> call, Response<RootListAdminResponse> response) {
+                    Log.d("listConvo", response.body().getData().get(0).getCat_name().toString());
+                    mAdapter.setListAdminResponses(new ArrayList<>(response.body().getData()));
                     mAdapter.notifyDataSetChanged();
                 }
-            }
 
-            @Override
-            public void onFailure(Call<ListConvoResponse> call, Throwable t) {
+                @Override
+                public void onFailure(Call<RootListAdminResponse> call, Throwable t) {
 
-            }
-        });
+                }
+            });
+        }
+
     }
 
     @Override

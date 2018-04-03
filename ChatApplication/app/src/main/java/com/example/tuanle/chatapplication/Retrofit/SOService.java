@@ -7,12 +7,16 @@ import com.example.tuanle.chatapplication.Response.CreateCategoryResponse;
 import com.example.tuanle.chatapplication.Response.CreateConvoResponse;
 import com.example.tuanle.chatapplication.Response.DetailConvoResponse;
 import com.example.tuanle.chatapplication.Response.KeyResponse;
+import com.example.tuanle.chatapplication.Response.ListAdminResponse;
 import com.example.tuanle.chatapplication.Response.ListConvoResponse;
 import com.example.tuanle.chatapplication.Response.LogInResponse;
+import com.example.tuanle.chatapplication.Response.PublicKeyResponse;
 import com.example.tuanle.chatapplication.Response.RemoveRequestResponse;
 import com.example.tuanle.chatapplication.Response.RequestCommingResponse;
 import com.example.tuanle.chatapplication.Response.RequestDetail;
+import com.example.tuanle.chatapplication.Response.RootCheckConnectResponse;
 import com.example.tuanle.chatapplication.Response.RootCreateConvoResponse;
+import com.example.tuanle.chatapplication.Response.RootListAdminResponse;
 
 import retrofit2.Call;
 import retrofit2.http.DELETE;
@@ -31,9 +35,18 @@ public interface SOService {
     Call<LogInResponse> logIn(@Query("name") String userName, @Query("pass") String password);
 
     //Get list all conservation
-    //TODO
-    @GET("/listconvo")
-    Call<ListConvoResponse> getListConvo(@Query("id") String userId);
+    //TODO--Remove old one
+//    @GET("/listconvo")
+//    Call<ListConvoResponse> getListConvo(@Query("id") String userId);
+
+    @GET("/listconvo/cate")
+    Call<ListConvoResponse> getListConvo(@Query("convo_cat") String convo_cat);
+
+    @GET("/admin")
+    Call<RootListAdminResponse> getListAdmin();
+
+    @GET("/checkconvo")
+    Call<RootCheckConnectResponse> checkConnect(@Query("adminId") int adminId,@Query("userId") int userId);
 
     //Get a detail conservation
     @GET("/convo/{id}")
@@ -71,6 +84,9 @@ public interface SOService {
     @POST("/convoadd")
     Call<RootCreateConvoResponse> createConvo(@Query("convo_cat") int convo_cat,
                                               @Query("convo_by") int convo_by);
+
+    @GET("/user/pbkey")
+    Call<PublicKeyResponse> getPbKey(@Query("id") int id);
 
     @POST("/cate/add")
     Call<CreateCategoryResponse> createCategory(@Query("cat_name") String cat_name,

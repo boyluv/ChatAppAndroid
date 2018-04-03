@@ -12,7 +12,7 @@ public class ConvoResponse {
     @Expose
     private String rep_message;
 
-    @SerializedName("ref_convo_id")
+    @SerializedName("convo_id")
     @Expose
     private String ref_convo_id;
 

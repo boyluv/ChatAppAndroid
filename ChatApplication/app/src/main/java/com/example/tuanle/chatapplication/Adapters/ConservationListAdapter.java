@@ -144,7 +144,7 @@ public class ConservationListAdapter extends RecyclerView.Adapter<ConservationLi
             //For list admin do sth
             final  ListAdminResponse curResponse = listAdminResponses.get(position);
             holder.userName.setText("Category name :"+curResponse.getCat_name());
-            holder.lastChat.setText("Category description :"+curResponse.getCat_description());
+            holder.lastChat.setText(curResponse.getCat_description());
             holder.userName.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {

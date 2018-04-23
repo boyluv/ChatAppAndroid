@@ -13,6 +13,7 @@ import com.example.tuanle.chatapplication.Retrofit.ApiUtils;
 import com.example.tuanle.chatapplication.Retrofit.SOService;
 import com.example.tuanle.chatapplication.Utils.Constants.ExtraKey;
 import com.example.tuanle.chatapplication.Utils.PreferenceUtils;
+import com.example.tuanle.chatapplication.Utils.ValidationUtils;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -30,22 +31,28 @@ public class CreateCategory extends AppCompatActivity {
         findViewById(R.id.btn_create).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                SOService mSOService;
-                mSOService = ApiUtils.getSOService();
-                mSOService.createCategory(edt_catName.getText().toString(),edt_catDescript.getText().toString()).enqueue(new Callback<CreateCategoryResponse>() {
-                    @Override
-                    public void onResponse(Call<CreateCategoryResponse> call, Response<CreateCategoryResponse> response) {
-                        PreferenceUtils.saveStringPref(getBaseContext(), ExtraKey.USER_CAT,response.body().getCat_id()+"");
+                if(ValidationUtils.isValidCategories()){
+                    //TODO--HUY
+                    SOService mSOService;
+                    mSOService = ApiUtils.getSOService();
+                    mSOService.createCategory(edt_catName.getText().toString(),edt_catDescript.getText().toString()).enqueue(new Callback<CreateCategoryResponse>() {
+                        @Override
+                        public void onResponse(Call<CreateCategoryResponse> call, Response<CreateCategoryResponse> response) {
+                            PreferenceUtils.saveStringPref(getBaseContext(), ExtraKey.USER_CAT,response.body().getCat_id()+"");
 
-                        Intent intent = new Intent(getBaseContext(), SignUpActivity.class);
-                        startActivity(intent);
-                    }
+                            Intent intent = new Intent(getBaseContext(), SignUpActivity.class);
+                            startActivity(intent);
+                        }
 
-                    @Override
-                    public void onFailure(Call<CreateCategoryResponse> call, Throwable t) {
+                        @Override
+                        public void onFailure(Call<CreateCategoryResponse> call, Throwable t) {
 
-                    }
-                });
+                        }
+                    });
+                }
+                else {
+                    //Show warning
+                }
             }
         });
     }

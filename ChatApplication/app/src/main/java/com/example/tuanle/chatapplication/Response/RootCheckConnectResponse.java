@@ -5,26 +5,11 @@ import com.google.gson.annotations.SerializedName;
 
 import java.util.List;
 
-public class RootCheckConnectResponse {
-    @SerializedName("data")
-    @Expose
-    private List<CheckConnectResponse> results ;
-
-    @SerializedName("status")
-    @Expose
-    private String status;
+public class RootCheckConnectResponse extends BaseResponse<List<CheckConnectResponse>>{
 
     @SerializedName("haveConnect")
     @Expose
     private boolean haveConnect;
-
-    public List<CheckConnectResponse> getResults() {
-        return results;
-    }
-
-    public String getStatus() {
-        return status;
-    }
 
     public boolean isHaveConnect() {
         return haveConnect;

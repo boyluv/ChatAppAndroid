@@ -5,30 +5,11 @@ import com.google.gson.annotations.SerializedName;
 
 import java.util.List;
 
-public class RequestCommingResponse {
-    @SerializedName("status")
-    @Expose
-    private String status;
+public class RequestCommingResponse extends BaseResponse<List<RequestDetail>>{
 
     @SerializedName("haveNotification")
     @Expose
     private boolean haveNotification;
-
-    @SerializedName("data")
-    @Expose
-    private List<RequestDetail> data;
-
-    @SerializedName("message")
-    @Expose
-    private String message;
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
 
     public boolean isHaveNotification() {
         return haveNotification;
@@ -38,19 +19,4 @@ public class RequestCommingResponse {
         this.haveNotification = haveNotification;
     }
 
-    public List<RequestDetail> getData() {
-        return data;
-    }
-
-    public void setData(List<RequestDetail> data) {
-        this.data = data;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
-    }
 }

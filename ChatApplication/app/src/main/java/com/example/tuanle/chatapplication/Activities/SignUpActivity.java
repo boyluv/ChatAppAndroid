@@ -12,11 +12,12 @@ import com.example.tuanle.chatapplication.Algorithm.CrDES;
 import com.example.tuanle.chatapplication.Algorithm.CrRSA;
 import com.example.tuanle.chatapplication.R;
 import com.example.tuanle.chatapplication.Request.SignupRequest;
-import com.example.tuanle.chatapplication.Response.KeyResponse;
+import com.example.tuanle.chatapplication.Response.BaseResponse;
 import com.example.tuanle.chatapplication.Retrofit.ApiUtils;
 import com.example.tuanle.chatapplication.Retrofit.SOService;
 import com.example.tuanle.chatapplication.Utils.Constants.ExtraKey;
 import com.example.tuanle.chatapplication.Utils.PreferenceUtils;
+import com.example.tuanle.chatapplication.Utils.ValidationUtils;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -41,9 +42,9 @@ public class SignUpActivity extends AppCompatActivity implements View.OnClickLis
     }
     private void getKey(){
         mService = ApiUtils.getSOService();
-        mService.getKey().enqueue(new Callback<KeyResponse>() {
+        mService.getKey().enqueue(new Callback<BaseResponse<String>>() {
             @Override
-            public void onResponse(Call<KeyResponse> call, Response<KeyResponse> response) {
+            public void onResponse(Call<BaseResponse<String>> call, Response<BaseResponse<String>> response) {
                 if(response.isSuccessful()){
                     mKey = response.body().getData();
                     Toast.makeText(getBaseContext(), mKey,
@@ -52,7 +53,7 @@ public class SignUpActivity extends AppCompatActivity implements View.OnClickLis
             }
 
             @Override
-            public void onFailure(Call<KeyResponse> call, Throwable t) {
+            public void onFailure(Call<BaseResponse<String>> call, Throwable t) {
                 Toast.makeText(getBaseContext(), mKey,
                         Toast.LENGTH_SHORT).show();
             }
@@ -64,58 +65,65 @@ public class SignUpActivity extends AppCompatActivity implements View.OnClickLis
     public void onClick(View v) {
         switch (v.getId()){
             case R.id.signup_btn:
-                if(mKey == null)
-                    getKey();
-                mService = ApiUtils.getSOService();
-                //TODO-----Binh
-                String name = edtUserName.getText().toString();
-                String pass = edtPass.getText().toString();
-                //Use DES encrypt password
-                String encryptedPass = CrDES.encryptDES(mKey,pass);
-                String pbKey ="";
-                String pvKey ="";
+                if(ValidationUtils.isValidUser() && ValidationUtils.isValidPassword()){
+                    //TODO -- Huy
+                    if(mKey == null)
+                        getKey();
+                    mService = ApiUtils.getSOService();
+                    //TODO-----Binh
+                    String name = edtUserName.getText().toString();
+                    String pass = edtPass.getText().toString();
+                    //Use DES encrypt password
+                    String encryptedPass = CrDES.encryptDES(mKey,pass);
+                    String pbKey ="";
+                    String pvKey ="";
 
-                //Start create RSA
-                try{
-                    CrRSA.generateKey();
-                    pbKey = CrRSA.getPublicKey(CrRSA.publicKey);
-                    pvKey = CrRSA.getPrivateKey(CrRSA.privateKey);
+                    //Start create RSA
+                    try{
+                        CrRSA.generateKey();
+                        pbKey = CrRSA.getPublicKey(CrRSA.publicKey);
+                        pvKey = CrRSA.getPrivateKey(CrRSA.privateKey);
 
-                    //TODO -- Tuan --Save to server
-                    Log.d("RSA","Public key: "+pbKey);
-                    //TODO -- Tuan --Save sharepreference with AES encrypt
-                    Log.d("RSA","Private key: "+pvKey);
+                        //TODO -- Tuan --Save to server
+                        Log.d("RSA","Public key: "+pbKey);
+                        //TODO -- Tuan --Save sharepreference with AES encrypt
+                        Log.d("RSA","Private key: "+pvKey);
 
-                    PreferenceUtils.saveStringPref(getBaseContext(), ExtraKey.PB_KEY,pbKey);
-                    PreferenceUtils.saveStringPref(getBaseContext(),ExtraKey.PV_KEY,pvKey);
+                        PreferenceUtils.saveStringPref(getBaseContext(), ExtraKey.PB_KEY,pbKey);
+                        PreferenceUtils.saveStringPref(getBaseContext(),ExtraKey.PV_KEY,pvKey);
 
-                }catch (Exception e){
-                    Log.d("RSA",e.toString());
-                }
-                //End
-                int userCat = Integer.parseInt(PreferenceUtils.getStringPref(getBaseContext(),ExtraKey.USER_CAT,"1"));
-                //TODO--DONE -- Fix ref_cat_id for admin
-                mService.signUp(name,encryptedPass,pbKey,userCat).enqueue(new Callback<SignupRequest>() {
+                    }catch (Exception e){
+                        Log.d("RSA",e.toString());
+                    }
+                    //End
+                    int userCat = Integer.parseInt(PreferenceUtils.getStringPref(getBaseContext(),ExtraKey.USER_CAT,"1"));
+                    //TODO--DONE -- Fix ref_cat_id for admin
+                    mService.signUp(name,encryptedPass,pbKey,userCat).enqueue(new Callback<SignupRequest>() {
 //                                    mService.signUp("Me","Me",pbKey,1).enqueue(new Callback<SignupRequest>() {
 
                         @Override
-                    public void onResponse(Call<SignupRequest> call, Response<SignupRequest> response) {
-                        if(response.isSuccessful()){
-                            Toast.makeText(getBaseContext(), "Sign up success ",
-                                    Toast.LENGTH_SHORT).show();
+                        public void onResponse(Call<SignupRequest> call, Response<SignupRequest> response) {
+                            if(response.isSuccessful()){
+                                Toast.makeText(getBaseContext(), "Sign up success ",
+                                        Toast.LENGTH_SHORT).show();
 
+                            }
+
+                            else
+                                Toast.makeText(getBaseContext(), "Sign up failed",
+                                        Toast.LENGTH_SHORT).show();
                         }
 
-                        else
-                            Toast.makeText(getBaseContext(), "Sign up failed",
-                                    Toast.LENGTH_SHORT).show();
-                    }
+                        @Override
+                        public void onFailure(Call<SignupRequest> call, Throwable t) {
 
-                    @Override
-                    public void onFailure(Call<SignupRequest> call, Throwable t) {
+                        }
+                    });
+                }
+                else {
+                    //Show warning
+                }
 
-                    }
-                });
                 break;
             default:
                     break;

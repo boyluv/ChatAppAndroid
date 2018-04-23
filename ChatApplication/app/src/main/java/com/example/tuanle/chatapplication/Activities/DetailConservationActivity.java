@@ -118,8 +118,8 @@ public class DetailConservationActivity extends AppCompatActivity implements Vie
                             Log.d("listConvo", "Get Inside");
                         }
                         else {
-                            Log.d("listConvo", response.body().getResults().get(0).getUser_name());
-                            mAdapter.setConservation(new ArrayList<Message>(response.body().getResults()));
+                            Log.d("listConvo", response.body().getData().get(0).getUser_name());
+                            mAdapter.setConservation(new ArrayList<Message>(response.body().getData()));
                             mAdapter.notifyDataSetChanged();
                         }
                         new ListenConversation().execute("","","");
@@ -159,8 +159,8 @@ public class DetailConservationActivity extends AppCompatActivity implements Vie
                         Log.d("listConvo", "Get Inside");
                     }
                     else {
-                        Log.d("listConvo", response.body().getResults().get(0).getUser_name());
-                        mAdapter.setConservation(new ArrayList<Message>(response.body().getResults()));
+                        Log.d("listConvo", response.body().getData().get(0).getUser_name());
+                        mAdapter.setConservation(new ArrayList<Message>(response.body().getData()));
                         mAdapter.notifyDataSetChanged();
                     }
                 }

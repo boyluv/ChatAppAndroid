@@ -8,29 +8,24 @@ import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
-import android.view.View;
 import android.widget.Toast;
 
 import com.example.tuanle.chatapplication.Adapters.ConservationListAdapter;
 import com.example.tuanle.chatapplication.Algorithm.CrRSA;
 import com.example.tuanle.chatapplication.R;
+import com.example.tuanle.chatapplication.Response.BaseResponse;
 import com.example.tuanle.chatapplication.Response.ConvoResponse;
 import com.example.tuanle.chatapplication.Response.CreateConvoResponse;
-import com.example.tuanle.chatapplication.Response.KeyResponse;
 import com.example.tuanle.chatapplication.Response.ListAdminResponse;
 import com.example.tuanle.chatapplication.Response.ListConvoResponse;
-import com.example.tuanle.chatapplication.Response.RemoveRequestResponse;
 import com.example.tuanle.chatapplication.Response.RequestCommingResponse;
 import com.example.tuanle.chatapplication.Response.RequestDetail;
-import com.example.tuanle.chatapplication.Response.RootCreateConvoResponse;
-import com.example.tuanle.chatapplication.Response.RootListAdminResponse;
 import com.example.tuanle.chatapplication.Retrofit.ApiUtils;
 import com.example.tuanle.chatapplication.Retrofit.SOService;
 import com.example.tuanle.chatapplication.Utils.Constants.ExtraKey;
 import com.example.tuanle.chatapplication.Utils.PreferenceUtils;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import retrofit2.Call;
@@ -153,17 +148,17 @@ public class ConservationListActivity extends AppCompatActivity {
 
                             //TODO--Right now
                             SOService createService = ApiUtils.getSOService();
-                            createService.createConvo(curCat,curConvoBy).enqueue(new Callback<RootCreateConvoResponse>() {
+                            createService.createConvo(curCat,curConvoBy).enqueue(new Callback<BaseResponse<List<CreateConvoResponse>>>() {
                                 @Override
-                                public void onResponse(Call<RootCreateConvoResponse> call, Response<RootCreateConvoResponse> response) {
+                                public void onResponse(Call<BaseResponse<List<CreateConvoResponse>>> call, Response<BaseResponse<List<CreateConvoResponse>>> response) {
                                     if(response.isSuccessful()){
 
-                                        final int convo_id = response.body().getResults().get(0).getConvo_id();
+                                        final int convo_id = response.body().getData().get(0).getConvo_id();
                                         //Delete Request
                                         SOService curService = ApiUtils.getSOService();
-                                        curService.deleteRequest(curUserId).enqueue(new Callback<RemoveRequestResponse>() {
+                                        curService.deleteRequest(curUserId).enqueue(new Callback<BaseResponse<String>>() {
                                             @Override
-                                            public void onResponse(Call<RemoveRequestResponse> call, Response<RemoveRequestResponse> response) {
+                                            public void onResponse(Call<BaseResponse<String>> call, Response<BaseResponse<String>> response) {
                                                 //Add new Request
                                                 int idUser = Integer.parseInt(PreferenceUtils.getStringPref(getBaseContext(),ExtraKey.USER_ID,"1"));
                                                 mService = ApiUtils.getSOService();
@@ -189,7 +184,7 @@ public class ConservationListActivity extends AppCompatActivity {
                                             }
 
                                             @Override
-                                            public void onFailure(Call<RemoveRequestResponse> call, Throwable t) {
+                                            public void onFailure(Call<BaseResponse<String>> call, Throwable t) {
                                                 Log.d("RequestSend","delete failed");
 
                                             }
@@ -198,7 +193,7 @@ public class ConservationListActivity extends AppCompatActivity {
                                 }
 
                                 @Override
-                                public void onFailure(Call<RootCreateConvoResponse> call, Throwable t) {
+                                public void onFailure(Call<BaseResponse<List<CreateConvoResponse>>> call, Throwable t) {
                                     Log.d("RequestSend","create convo failed");
 
                                 }
@@ -211,9 +206,9 @@ public class ConservationListActivity extends AppCompatActivity {
                                 int curUserId = Integer.parseInt(PreferenceUtils.getStringPref(getBaseContext(),ExtraKey.USER_ID,"1"));
                                 // curUserId = 1;
                                 SOService curService = ApiUtils.getSOService();
-                                curService.deleteRequest(curUserId).enqueue(new Callback<RemoveRequestResponse>() {
+                                curService.deleteRequest(curUserId).enqueue(new Callback<BaseResponse<String>>() {
                                     @Override
-                                    public void onResponse(Call<RemoveRequestResponse> call, Response<RemoveRequestResponse> response) {
+                                    public void onResponse(Call<BaseResponse<String>> call, Response<BaseResponse<String>> response) {
                                         int convo_id = Integer.parseInt(separated[2]);
                                         //Change to Activity with that id
                                         Intent intent = new Intent(getBaseContext(), DetailConservationActivity.class);
@@ -224,7 +219,7 @@ public class ConservationListActivity extends AppCompatActivity {
                                     }
 
                                     @Override
-                                    public void onFailure(Call<RemoveRequestResponse> call, Throwable t) {
+                                    public void onFailure(Call<BaseResponse<String>> call, Throwable t) {
 
                                     }
                                 });
@@ -273,9 +268,9 @@ public class ConservationListActivity extends AppCompatActivity {
                 @Override
                 public void onResponse(Call<ListConvoResponse> call, Response<ListConvoResponse> response) {
                     if(response.isSuccessful()) {
-                        if(response.body().getResults().size()>0){
-                            Log.d("listConvo", response.body().getResults().get(0).getRep_message().toString());
-                            mAdapter.setListConvo(new ArrayList<>(response.body().getResults()));
+                        if(response.body().getData().size()>0){
+                            Log.d("listConvo", response.body().getData().get(0).getRep_message().toString());
+                            mAdapter.setListConvo(new ArrayList<>(response.body().getData()));
                             mAdapter.notifyDataSetChanged();
                         }
 
@@ -290,16 +285,16 @@ public class ConservationListActivity extends AppCompatActivity {
         }
         else {
             //Load for user
-            mService.getListAdmin().enqueue(new Callback<RootListAdminResponse>() {
+            mService.getListAdmin().enqueue(new Callback<BaseResponse<List<ListAdminResponse>>>() {
                 @Override
-                public void onResponse(Call<RootListAdminResponse> call, Response<RootListAdminResponse> response) {
+                public void onResponse(Call<BaseResponse<List<ListAdminResponse>>> call, Response<BaseResponse<List<ListAdminResponse>>> response) {
                     Log.d("listConvo", response.body().getData().get(0).getCat_name().toString());
                     mAdapter.setListAdminResponses(new ArrayList<>(response.body().getData()));
                     mAdapter.notifyDataSetChanged();
                 }
 
                 @Override
-                public void onFailure(Call<RootListAdminResponse> call, Throwable t) {
+                public void onFailure(Call<BaseResponse<List<ListAdminResponse>>> call, Throwable t) {
 
                 }
             });

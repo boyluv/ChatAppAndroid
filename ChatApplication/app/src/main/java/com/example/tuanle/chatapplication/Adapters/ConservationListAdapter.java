@@ -11,12 +11,11 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.example.tuanle.chatapplication.Activities.DetailConservationActivity;
-import com.example.tuanle.chatapplication.Algorithm.CrAES;
 import com.example.tuanle.chatapplication.Algorithm.CrRSA;
 import com.example.tuanle.chatapplication.R;
+import com.example.tuanle.chatapplication.Response.BaseResponse;
 import com.example.tuanle.chatapplication.Response.ConvoResponse;
 import com.example.tuanle.chatapplication.Response.ListAdminResponse;
-import com.example.tuanle.chatapplication.Response.PublicKeyResponse;
 import com.example.tuanle.chatapplication.Response.RequestDetail;
 import com.example.tuanle.chatapplication.Response.RootCheckConnectResponse;
 import com.example.tuanle.chatapplication.Retrofit.ApiUtils;
@@ -64,8 +63,8 @@ public class ConservationListAdapter extends RecyclerView.Adapter<ConservationLi
                     if(response.body().isHaveConnect())
                     {
                         Intent intent = new Intent(mContext, DetailConservationActivity.class);
-                        Log.d("DetailConvo", "This is convo Id " + response.body().getResults().get(0).getConvo_id());
-                        intent.putExtra(ExtraKey.CONSERVATION_ID, response.body().getResults().get(0).getConvo_id()+"");
+                        Log.d("DetailConvo", "This is convo Id " + response.body().getData().get(0).getConvo_id());
+                        intent.putExtra(ExtraKey.CONSERVATION_ID, response.body().getData().get(0).getConvo_id()+"");
                         mContext.startActivity(intent);
                     }
                     else {
@@ -73,9 +72,9 @@ public class ConservationListAdapter extends RecyclerView.Adapter<ConservationLi
                         //Create key between two user
 
                         //Get public key from another one
-                        mService.getPbKey(idAdmin).enqueue(new Callback<PublicKeyResponse>() {
+                        mService.getPbKey(idAdmin).enqueue(new Callback<BaseResponse<String>>() {
                             @Override
-                            public void onResponse(Call<PublicKeyResponse> call, Response<PublicKeyResponse> response) {
+                            public void onResponse(Call<BaseResponse<String>> call, Response<BaseResponse<String>> response) {
                                 Log.d("PbKey",response.body().getData());
                                 String pbKey = response.body().getData();
                                 String message="";
@@ -104,7 +103,7 @@ public class ConservationListAdapter extends RecyclerView.Adapter<ConservationLi
                             }
 
                             @Override
-                            public void onFailure(Call<PublicKeyResponse> call, Throwable t) {
+                            public void onFailure(Call<BaseResponse<String>> call, Throwable t) {
 
                             }
                         });

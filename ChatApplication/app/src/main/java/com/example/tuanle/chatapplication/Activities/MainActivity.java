@@ -12,14 +12,13 @@ import android.widget.Toast;
 import com.example.tuanle.chatapplication.Algorithm.CrAES;
 import com.example.tuanle.chatapplication.Algorithm.CrDES;
 import com.example.tuanle.chatapplication.R;
-import com.example.tuanle.chatapplication.Response.CreateConvoResponse;
-import com.example.tuanle.chatapplication.Response.KeyResponse;
+import com.example.tuanle.chatapplication.Response.BaseResponse;
 import com.example.tuanle.chatapplication.Response.LogInResponse;
-import com.example.tuanle.chatapplication.Response.RootCreateConvoResponse;
 import com.example.tuanle.chatapplication.Retrofit.ApiUtils;
 import com.example.tuanle.chatapplication.Retrofit.SOService;
 import com.example.tuanle.chatapplication.Utils.Constants.ExtraKey;
 import com.example.tuanle.chatapplication.Utils.PreferenceUtils;
+import com.example.tuanle.chatapplication.Utils.ValidationUtils;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -82,11 +81,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         startActivity(intent);
     }
 
-    private boolean validateUser(){
-
-        return true;
-    }
-
     private void showListConservation(){
         Intent intent = new Intent(getBaseContext(), ConservationListActivity.class);
         startActivity(intent);
@@ -94,9 +88,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private void getKey(){
         mService = ApiUtils.getSOService();
-        mService.getKey().enqueue(new Callback<KeyResponse>() {
+        mService.getKey().enqueue(new Callback<BaseResponse<String>>() {
             @Override
-            public void onResponse(Call<KeyResponse> call, Response<KeyResponse> response) {
+            public void onResponse(Call<BaseResponse<String>> call, Response<BaseResponse<String>> response) {
                 if(response.isSuccessful()){
                     //TODO--Binh this is Key
                     mKey = response.body().getData();
@@ -106,7 +100,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
 
             @Override
-            public void onFailure(Call<KeyResponse> call, Throwable t) {
+            public void onFailure(Call<BaseResponse<String>> call, Throwable t) {
 
             }
         });
@@ -121,7 +115,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             case R.id.signin_btn:
                 if (mKey == null)
                     getKey();
-                else if(validateUser())
+                else if(ValidationUtils.isValidUser() && ValidationUtils.isValidPassword())
                     {
                         String encryptedPass = CrDES.encryptDES(mKey,password.getText().toString());
                         mService = ApiUtils.getSOService();

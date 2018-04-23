@@ -52,7 +52,7 @@ public class ConservationListActivity extends AppCompatActivity {
         String userId = PreferenceUtils.getStringPref(getBaseContext(),ExtraKey.USER_ID,null);
         Log.d("UserLogin", "New activity " + userId);
 
-        mRecyclerView = (RecyclerView) findViewById(R.id.rv_conservation_lists);
+        mRecyclerView = findViewById(R.id.rv_conservation_lists);
 //        mRvCategories = (RecyclerView) findViewById(R.id.rv_vertical_conservation_lists);
 
 //        //Initialize list categories

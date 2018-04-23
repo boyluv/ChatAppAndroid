@@ -45,9 +45,9 @@ public class DetailConservationActivity extends AppCompatActivity implements Vie
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail_conservation);
-        mRecyclerView = (RecyclerView) findViewById(R.id.rv_conservation);
-        imgBtnSend = (ImageButton) findViewById(R.id.imgbtn_send);
-        mMessage = (EditText) findViewById(R.id.edt_message);
+        mRecyclerView = findViewById(R.id.rv_conservation);
+        imgBtnSend = findViewById(R.id.imgbtn_send);
+        mMessage = findViewById(R.id.edt_message);
         imgBtnSend.setOnClickListener(this);
 
         curConvoId = Integer.parseInt(getIntent().getStringExtra(ExtraKey.CONSERVATION_ID));

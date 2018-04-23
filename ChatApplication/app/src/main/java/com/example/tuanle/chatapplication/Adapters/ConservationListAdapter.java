@@ -180,8 +180,8 @@ public class ConservationListAdapter extends RecyclerView.Adapter<ConservationLi
         private TextView lastChat;
         public ItemViewHolder(View itemView) {
             super(itemView);
-            userName = (TextView) itemView.findViewById(R.id.tv_user_name);
-            lastChat =(TextView) itemView.findViewById(R.id.tv_last_message);
+            userName = itemView.findViewById(R.id.tv_user_name);
+            lastChat = itemView.findViewById(R.id.tv_last_message);
         }
     }
 }

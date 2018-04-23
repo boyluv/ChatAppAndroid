@@ -94,7 +94,7 @@ public class DetailConservationAdapter extends RecyclerView.Adapter<DetailConser
         private TextView message;
         public ItemHolder(View itemView) {
             super(itemView);
-            message = (TextView) itemView.findViewById(R.id.tv_message);
+            message = itemView.findViewById(R.id.tv_message);
         }
     }
 }

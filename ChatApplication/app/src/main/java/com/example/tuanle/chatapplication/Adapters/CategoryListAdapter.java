@@ -11,7 +11,7 @@ public class CategoryListAdapter  {
         private TextView mCategoryName;
         public ItemViewHolder(View itemView) {
             super(itemView);
-            mCategoryName = (TextView) itemView.findViewById(R.id.tv_category);
+            mCategoryName = itemView.findViewById(R.id.tv_category);
         }
     }
 }

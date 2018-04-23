@@ -24,8 +24,8 @@ public class CreateCategory extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_category);
-        final EditText edt_catName = (EditText) findViewById(R.id.edt_catName);
-        final EditText edt_catDescript = (EditText) findViewById(R.id.edt_catDescript);
+        final EditText edt_catName = findViewById(R.id.edt_catName);
+        final EditText edt_catDescript = findViewById(R.id.edt_catDescript);
 
         findViewById(R.id.btn_create).setOnClickListener(new View.OnClickListener() {
             @Override

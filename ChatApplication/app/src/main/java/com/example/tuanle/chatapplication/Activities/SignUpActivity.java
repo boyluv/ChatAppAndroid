@@ -65,7 +65,7 @@ public class SignUpActivity extends AppCompatActivity implements View.OnClickLis
     public void onClick(View v) {
         switch (v.getId()){
             case R.id.signup_btn:
-                if(ValidationUtils.isValidUser() && ValidationUtils.isValidPassword()){
+                if(ValidationUtils.isValidUser(edtUserName.getText().toString()) && ValidationUtils.isValidPassword(edtPass.getText().toString())){
                     //TODO -- Huy
                     if(mKey == null)
                         getKey();
@@ -122,6 +122,7 @@ public class SignUpActivity extends AppCompatActivity implements View.OnClickLis
                 }
                 else {
                     //Show warning
+                    Toast.makeText(getBaseContext(),"Invalid username or password", Toast.LENGTH_SHORT).show();
                 }
 
                 break;

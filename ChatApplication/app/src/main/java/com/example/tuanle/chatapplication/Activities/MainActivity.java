@@ -115,7 +115,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             case R.id.signin_btn:
                 if (mKey == null)
                     getKey();
-                else if(ValidationUtils.isValidUser() && ValidationUtils.isValidPassword())
+                else if(ValidationUtils.isValidUser(userName.getText().toString()) && ValidationUtils.isValidPassword(password.getText().toString()))
                     {
                         String encryptedPass = CrDES.encryptDES(mKey,password.getText().toString());
                         mService = ApiUtils.getSOService();

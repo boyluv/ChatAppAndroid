@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import com.example.tuanle.chatapplication.R;
 import com.example.tuanle.chatapplication.Response.CreateCategoryResponse;
@@ -31,7 +32,7 @@ public class CreateCategory extends AppCompatActivity {
         findViewById(R.id.btn_create).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(ValidationUtils.isValidCategories()){
+                if(ValidationUtils.isValidCategories(edt_catName.getText().toString(),edt_catDescript.getText().toString())){
                     //TODO--HUY
                     SOService mSOService;
                     mSOService = ApiUtils.getSOService();
@@ -51,7 +52,7 @@ public class CreateCategory extends AppCompatActivity {
                     });
                 }
                 else {
-                    //Show warning
+                    Toast.makeText(getBaseContext(),"Category name and description must not be empty", Toast.LENGTH_SHORT).show();
                 }
             }
         });

@@ -32,7 +32,7 @@ public class CreateCategory extends AppCompatActivity {
         findViewById(R.id.btn_create).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(ValidationUtils.isValidCategories(edt_catName.getText().toString(),edt_catDescript.getText().toString())){
+                if(ValidationUtils.isValidCategories(edt_catName.getText().toString(),edt_catDescript.getText().toString()) == 1){
                     //TODO--HUY
                     SOService mSOService;
                     mSOService = ApiUtils.getSOService();
@@ -52,7 +52,10 @@ public class CreateCategory extends AppCompatActivity {
                     });
                 }
                 else {
-                    Toast.makeText(getBaseContext(),"Category name and description must not be empty", Toast.LENGTH_SHORT).show();
+                    if (ValidationUtils.isValidCategories(edt_catName.getText().toString(),edt_catDescript.getText().toString()) == 2)
+                        Toast.makeText(getBaseContext(),"Category name must contain at least 4 characters including only letters and no numbers", Toast.LENGTH_LONG).show();
+                    else
+                        Toast.makeText(getBaseContext(),"Category description must contain at least 10 characters including letters and numbers only", Toast.LENGTH_LONG).show();
                 }
             }
         });

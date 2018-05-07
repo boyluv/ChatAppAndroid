@@ -122,7 +122,10 @@ public class SignUpActivity extends AppCompatActivity implements View.OnClickLis
                 }
                 else {
                     //Show warning
-                    Toast.makeText(getBaseContext(),"Invalid username or password", Toast.LENGTH_SHORT).show();
+                    if(!ValidationUtils.isValidPassword(edtPass.getText().toString()))
+                        Toast.makeText(getBaseContext(),"Password must contain 4 to 8 characters including letters and numbers only", Toast.LENGTH_LONG).show();
+                    else
+                        Toast.makeText(getBaseContext(),"Username must start with a letter including only letters and numbers", Toast.LENGTH_LONG).show();
                 }
 
                 break;
